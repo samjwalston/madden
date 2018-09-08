@@ -1,4 +1,7 @@
 class ImportController < ApplicationController
+  skip_before_action :verify_authenticity_token
+
+
   def teams
     inspect_data
     head :no_content
