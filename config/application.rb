@@ -21,6 +21,7 @@ module Madden
     config.load_defaults 5.1
     config.generators.system_tests = nil
 
+    Dir["#{config.root}/app/**"].each{|p| config.autoload_paths += [p]}
 
     config.middleware.insert_before(0, Rack::Cors) do
       allow do
@@ -28,7 +29,5 @@ module Madden
         resource "/import", headers: :any, methods: [:post]
       end
     end
-
-    Dir["#{config.root}/app/**"].each{|p| config.autoload_paths += [p]}
   end
 end
