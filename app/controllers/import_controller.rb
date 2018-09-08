@@ -4,28 +4,29 @@ class ImportController < ApplicationController
 
   def teams
     inspect_data
-    head :no_content
+  end
+
+  def standings
+    inspect_data
   end
 
   def rosters
     inspect_data
-    head :no_content
   end
 
   def schedules
     inspect_data
-    head :no_content
   end
 
 
   private
 
   def inspect_data
-    puts "Hello There"
-  rescue
     puts "==="
     puts response['Content-Encoding']
     puts request.format
     puts "==="
+
+    head :no_content
   end
 end
