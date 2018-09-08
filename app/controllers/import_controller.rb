@@ -24,6 +24,7 @@ class ImportController < ApplicationController
     puts "Hello There"
   rescue
     puts "==="
+    puts response['Content-Encoding']
     puts request.format
     puts "==="
   end
