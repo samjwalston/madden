@@ -1,13 +1,24 @@
 class ImportController < ApplicationController
   def teams
-    head :no_content
+    inspect_data
   end
 
   def rosters
-    head :no_content
+    inspect_data
   end
 
   def schedules
+    inspect_data
+  end
+
+
+  private
+
+  def inspect_data
+    puts "==="
+    puts request.format
+    puts "==="
+
     head :no_content
   end
 end
