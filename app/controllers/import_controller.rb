@@ -23,8 +23,7 @@ class ImportController < ApplicationController
 
   def inspect_data
     puts "==="
-    puts response['Content-Encoding']
-    puts request.format
+    puts params.inspect
     puts "==="
 
     head :no_content

@@ -1,0 +1,2 @@
+class DraftPlayer < ApplicationRecord
+end
