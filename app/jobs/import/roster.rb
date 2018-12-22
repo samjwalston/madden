@@ -25,8 +25,8 @@ class Import::Roster < ApplicationJob
       end
     end.to_h
 
-    details[:player_id] = details.delete(:roster_id)
-    details[:id] = [details[:league_id], details[:player_id]].join(":")
+    details[:player_id] = attributes["rosterId"]
+    details[:id] = [parameters[:league_id], attributes[:player_id]].join(":")
 
     Player.new(details)
   end
