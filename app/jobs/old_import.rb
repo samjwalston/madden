@@ -1,4 +1,4 @@
-class Import < ApplicationJob
+class OldImport < ApplicationJob
   def perform(filename)
     data = JSON.parse(File.read(Rails.root.join(filename)))
     clear_data
