@@ -26,7 +26,7 @@ class Import::Roster < ApplicationJob
     end.to_h
 
     details[:player_id] = attributes["rosterId"]
-    details[:id] = [parameters[:league_id], attributes[:player_id]].join(":")
+    details[:id] = [parameters[:league_id], details[:player_id]].join(":")
 
     puts "==="
     puts details.inspect
