@@ -11,6 +11,7 @@ gem 'rack-cors', '~> 1.0', require: 'rack/cors'
 gem 'sassc-rails', '~> 1.3'
 gem 'uglifier', '~> 4.1'
 gem 'jbuilder', '~> 2.7'
+gem 'activerecord-import', '~> 0.27.0'
 
 group :development do
   gem 'dotenv-rails', '~> 2.5'

@@ -11,7 +11,7 @@ class ImportController < ApplicationController
   end
 
   def rosters
-    inspect_data
+    Import::Roster.perform_later(safe_params)
   end
 
   def schedules
@@ -27,5 +27,9 @@ class ImportController < ApplicationController
     puts "==="
 
     head :no_content
+  end
+
+  def safe_params
+    params.except(:message, :success, :import).to_h
   end
 end

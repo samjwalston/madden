@@ -1,8 +1,9 @@
 class CreatePlayers < ActiveRecord::Migration[5.1]
-  def self.up
+  def up
     create_table :players, id: false do |t|
-      t.bigint :id, primary_key: true
+      t.string :id, primary_key: true # "#{platform}:#{league_id}:#{player_id}"
       t.bigint :presentation_id
+      t.bigint :player_id
       t.bigint :team_id
       t.integer :accel_rating
       t.integer :age
@@ -134,7 +135,7 @@ class CreatePlayers < ActiveRecord::Migration[5.1]
     end
   end
 
-  def self.down
+  def down
     drop_table :players
   end
 end
