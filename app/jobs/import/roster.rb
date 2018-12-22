@@ -15,11 +15,14 @@ class Import::Roster < ApplicationJob
 
   def format_data(attributes, parameters)
     columns = Player.column_names
+    details = {}
 
-    details = attributes.merge(parameters).each do |k, v|
+    attributes.merge(parameters).each do |k, v|
       key = k.to_s.underscore
 
-      [key.to_sym, v] if columns.include?(key)
+      if columns.include?(key)
+        details[key.to_sym] = v
+      end
     end.to_h
 
     details[:player_id] = details.delete(:roster_id)
