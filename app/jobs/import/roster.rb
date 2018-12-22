@@ -28,6 +28,10 @@ class Import::Roster < ApplicationJob
     details[:player_id] = attributes["rosterId"]
     details[:id] = [parameters[:league_id], attributes[:player_id]].join(":")
 
+    puts "==="
+    puts details.inspect
+    puts "==="
+
     Player.new(details)
   end
 end
