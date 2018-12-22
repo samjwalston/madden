@@ -30,6 +30,6 @@ class ImportController < ApplicationController
   end
 
   def safe_params
-    params.except(:message, :success, :import).to_h
+    params.except(:message, :success, :import).to_unsafe_hash
   end
 end
