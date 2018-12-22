@@ -1,7 +1,7 @@
 require 'resque/tasks'
 
 namespace :resque do
-  task :setup do
+  task :setup => :environment do
     require 'resque'
 
     Resque.redis = if Rails.env.production?
