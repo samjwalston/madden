@@ -11,26 +11,20 @@ class Import::Roster < ApplicationJob
     Player.import(players, on_duplicate_key_update: :all)
   end
 
+
   private
 
-  def format_data(attributes, parameters)
-    columns = Player.column_names
-    details = {}
+  def format_data(attributes, parameters, details = {})
+    attributes.merge(parameters).each do |key, value|
+      key = key.to_s.underscore
 
-    attributes.merge(parameters).each do |k, v|
-      key = k.to_s.underscore
-
-      if columns.include?(key)
-        details[key.to_sym] = v
+      if Player.column_names.include?(key)
+        details[key.to_sym] = value
       end
-    end.to_h
+    end
 
     details[:player_id] = attributes["rosterId"]
     details[:id] = [parameters[:league_id], details[:player_id]].join(":")
-
-    puts "==="
-    puts details.inspect
-    puts "==="
 
     Player.new(details)
   end

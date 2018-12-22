@@ -12,6 +12,7 @@ class ImportController < ApplicationController
 
   def rosters
     Import::Roster.perform_later(safe_params)
+    head :ok
   end
 
   def schedules
@@ -26,7 +27,7 @@ class ImportController < ApplicationController
     puts params.inspect
     puts "==="
 
-    head :no_content
+    head :ok
   end
 
   def safe_params
