@@ -1,7 +1,8 @@
 class CreatePlayers < ActiveRecord::Migration[5.1]
   def up
     create_table :players, id: false do |t|
-      t.string :id, primary_key: true
+      t.string :id, primary_key: true # "#{league_id}:#{player_id}"
+      t.bigint :league_id
       t.bigint :presentation_id
       t.bigint :player_id
       t.bigint :team_id
@@ -133,6 +134,10 @@ class CreatePlayers < ActiveRecord::Migration[5.1]
       t.boolean :is_on_ir
       t.boolean :is_on_practice_squad
     end
+
+    add_index :players, [:league_id], name: :players_league_index
+    add_index :players, [:player_id], name: :players_identifier_index
+    add_index :players, [:team_id], name: :players_team_index
   end
 
   def down

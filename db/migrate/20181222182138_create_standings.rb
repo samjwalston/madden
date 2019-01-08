@@ -1,7 +1,7 @@
 class CreateStandings < ActiveRecord::Migration[5.1]
   def up
     create_table :standings, id: false do |t|
-      t.bigint :id, primary_key: true # "#{platform}:#{league_id}:#{team_id}:#{calendar_year}"
+      t.bigint :id, primary_key: true # "#{league_id}:#{team_id}:#{calendar_year}"
       t.bigint :conference_id
       t.bigint :division_id
       t.bigint :team_id

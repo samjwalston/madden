@@ -10,37 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181205000153) do
+ActiveRecord::Schema.define(version: 20181222185851) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "draft_players", force: :cascade do |t|
-    t.bigint "player_id"
-    t.bigint "team_id"
-    t.integer "age"
-    t.integer "clutch_trait"
-    t.integer "dev_trait"
-    t.integer "draft_num"
-    t.integer "draft_pick"
-    t.integer "draft_round"
-    t.integer "intangible_grade"
-    t.integer "physical_grade"
-    t.integer "player_best_ovr"
-    t.integer "player_scheme_ovr"
-    t.integer "production_grade"
-    t.integer "scheme"
-    t.integer "team_scheme_ovr"
-    t.integer "years_pro"
-    t.integer "contract_bonus"
-    t.integer "contract_length"
-    t.integer "contract_salary"
+  create_table "leagues", id: :bigint, default: nil, force: :cascade do |t|
     t.string "name"
-    t.string "position"
   end
 
-  create_table "players", id: :bigint, default: nil, force: :cascade do |t|
+  create_table "players", id: :string, force: :cascade do |t|
+    t.bigint "league_id"
     t.bigint "presentation_id"
+    t.bigint "player_id"
     t.bigint "team_id"
     t.integer "accel_rating"
     t.integer "age"
@@ -169,19 +151,32 @@ ActiveRecord::Schema.define(version: 20181205000153) do
     t.boolean "is_free_agent"
     t.boolean "is_on_ir"
     t.boolean "is_on_practice_squad"
+    t.index ["league_id"], name: "players_league_index"
+    t.index ["player_id"], name: "players_identifier_index"
+    t.index ["team_id"], name: "players_team_index"
   end
 
-  create_table "teams", id: :bigint, default: nil, force: :cascade do |t|
+  create_table "schedules", id: :string, force: :cascade do |t|
+    t.bigint "away_team_id"
+    t.bigint "home_team_id"
+    t.bigint "schedule_id"
+    t.integer "away_score"
+    t.integer "home_score"
+    t.integer "season_index"
+    t.integer "stage_index"
+    t.integer "status"
+    t.integer "week_index"
+    t.boolean "is_game_of_the_week"
+  end
+
+  create_table "standings", id: :bigint, default: nil, force: :cascade do |t|
     t.bigint "conference_id"
     t.bigint "division_id"
-    t.bigint "logo_id"
+    t.bigint "team_id"
     t.integer "away_losses"
     t.integer "away_ties"
     t.integer "away_wins"
     t.integer "calendar_year"
-    t.integer "cap_available"
-    t.integer "cap_room"
-    t.integer "cap_spent"
     t.integer "conf_losses"
     t.integer "conf_ties"
     t.integer "conf_wins"
@@ -189,7 +184,6 @@ ActiveRecord::Schema.define(version: 20181205000153) do
     t.integer "def_pass_yds_rank"
     t.integer "def_rush_yds"
     t.integer "def_rush_yds_rank"
-    t.integer "def_scheme"
     t.integer "def_total_yds"
     t.integer "def_total_yds_rank"
     t.integer "div_losses"
@@ -198,36 +192,51 @@ ActiveRecord::Schema.define(version: 20181205000153) do
     t.integer "home_losses"
     t.integer "home_ties"
     t.integer "home_wins"
-    t.integer "injury_count"
     t.integer "net_pts"
     t.integer "off_pass_yds"
     t.integer "off_pass_yds_rank"
     t.integer "off_rush_yds"
     t.integer "off_rush_yds_rank"
-    t.integer "off_scheme"
     t.integer "off_total_yds"
     t.integer "off_total_yds_rank"
-    t.integer "ovr_rating"
+    t.integer "pts_against_rank"
+    t.integer "pts_for_rank"
     t.integer "playoff_status"
     t.integer "prev_rank"
-    t.integer "primary_color"
     t.integer "pts_against"
-    t.integer "pts_against_rank"
     t.integer "pts_for"
-    t.integer "pts_for_rank"
     t.integer "rank"
-    t.integer "season_index"
-    t.integer "secondary_color"
     t.integer "seed"
+    t.integer "season_index"
     t.integer "stage_index"
-    t.integer "t_o_diff"
-    t.integer "team_ovr"
     t.integer "total_losses"
     t.integer "total_ties"
     t.integer "total_wins"
+    t.integer "t_o_diff"
     t.integer "week_index"
     t.integer "win_loss_streak"
     t.decimal "win_pct"
+    t.string "conference_name"
+    t.string "division_name"
+    t.string "team_name"
+  end
+
+  create_table "teams", id: :string, force: :cascade do |t|
+    t.bigint "conference_id"
+    t.bigint "division_id"
+    t.bigint "league_id"
+    t.bigint "logo_id"
+    t.bigint "team_id"
+    t.integer "cap_available"
+    t.integer "cap_room"
+    t.integer "cap_spent"
+    t.integer "def_scheme"
+    t.integer "injury_count"
+    t.integer "off_scheme"
+    t.integer "ovr_rating"
+    t.integer "primary_color"
+    t.integer "secondary_color"
+    t.integer "team_ovr"
     t.string "abbr_name"
     t.string "city_name"
     t.string "conference_name"
@@ -237,6 +246,8 @@ ActiveRecord::Schema.define(version: 20181205000153) do
     t.string "nick_name"
     t.string "team_name"
     t.string "user_name"
+    t.index ["league_id"], name: "teams_league_index"
+    t.index ["team_id"], name: "teams_identifier_index"
   end
 
 end

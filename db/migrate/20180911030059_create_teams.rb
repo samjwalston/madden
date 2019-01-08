@@ -1,9 +1,10 @@
 class CreateTeams < ActiveRecord::Migration[5.1]
   def up
     create_table :teams, id: false do |t|
-      t.string :id, primary_key: true # "#{platform}:#{league_id}:#{team_id}"
+      t.string :id, primary_key: true # "#{league_id}:#{team_id}"
       t.bigint :conference_id
       t.bigint :division_id
+      t.bigint :league_id
       t.bigint :logo_id
       t.bigint :team_id
       t.integer :cap_available
@@ -26,6 +27,9 @@ class CreateTeams < ActiveRecord::Migration[5.1]
       t.string :team_name
       t.string :user_name
     end
+
+    add_index :teams, [:league_id], name: :teams_league_index
+    add_index :teams, [:team_id], name: :teams_identifier_index
   end
 
   def down

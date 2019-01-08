@@ -2,7 +2,6 @@ class Import::Roster < ApplicationJob
   def perform(data)
     players = data["rosterInfoList"].map do |player|
       format_data(player, {
-        platform: data["platform"],
         league_id: data["league_id"],
         team_id: data["team_id"],
       })
