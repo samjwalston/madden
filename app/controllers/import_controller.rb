@@ -3,7 +3,7 @@ class ImportController < ApplicationController
 
 
   def teams
-    # Import::Team.perform_later(safe_params)
+    Import::Team.perform_later(safe_params)
     head :ok
   end
 
