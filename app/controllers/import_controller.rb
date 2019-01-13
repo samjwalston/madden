@@ -3,7 +3,8 @@ class ImportController < ApplicationController
 
 
   def teams
-    inspect_data
+    # Import::Team.perform_later(safe_params)
+    head :ok
   end
 
   def standings
