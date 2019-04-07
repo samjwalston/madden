@@ -1,5 +1,7 @@
 class Import::Roster < ApplicationJob
   def perform(data)
+    Player.where(league_id: data["league_id"]).delete_all
+
     players = data["rosterInfoList"].map do |player|
       format_data(player, {
         league_id: data["league_id"],
