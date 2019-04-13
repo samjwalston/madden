@@ -17,7 +17,8 @@ class ImportController < ApplicationController
   end
 
   def schedules
-    inspect_data
+    Import::Schedule.perform_later(safe_params)
+    head :ok
   end
 
 
