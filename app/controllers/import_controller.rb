@@ -3,25 +3,22 @@ class ImportController < ApplicationController
 
 
   def teams
-    inspect_data
-    # Import::Team.perform_later(safe_params)
-    # head :ok
+    Import::Team.perform_later(safe_params)
+    head :ok
   end
 
   def standings
-    inspect_data
+    head :ok
   end
 
   def rosters
-    inspect_data
-    # Import::Roster.perform_later(safe_params)
-    # head :ok
+    Import::Roster.perform_later(safe_params)
+    head :ok
   end
 
   def schedules
-    inspect_data
-    # Import::Schedule.perform_later(safe_params)
-    # head :ok
+    Import::Schedule.perform_later(safe_params)
+    head :ok
   end
 
 
