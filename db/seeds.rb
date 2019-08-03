@@ -8,41 +8,48 @@
 
 
 PlayerOverall.delete_all
-PlayerOverall.create([{id:99,rating:2293.6},{id:98,rating:1790.7},{id:97,rating:1505.7},
-{id:96,rating:1316.3},{id:95,rating:1118.4},{id:94,rating:989.2},
-{id:93,rating:871.3},{id:92,rating:735.2},{id:91,rating:664.1},
-{id:90,rating:596.7},{id:89,rating:522.7},{id:88,rating:463.9},
-{id:87,rating:419.3},{id:86,rating:376.6},{id:85,rating:335.4},
-{id:84,rating:300.4},{id:83,rating:270.0},{id:82,rating:246.6},
-{id:81,rating:224.1},{id:80,rating:207.2},{id:79,rating:192.8},
-{id:78,rating:179.4},{id:77,rating:167.3},{id:76,rating:155.5},
-{id:75,rating:144.3},{id:74,rating:133.4},{id:73,rating:123.0},
-{id:72,rating:112.8},{id:71,rating:102.9},{id:70,rating:93.2},
-{id:69,rating:84.8},{id:68,rating:77.5},{id:67,rating:70.0}])
+PlayerOverall.create([{id:99,rating:2293.6},{id:98,rating:2176.0},{id:97,rating:2058.4},
+{id:96,rating:1940.7},{id:95,rating:1823.1},{id:94,rating:1705.5},{id:93,rating:1587.9},
+{id:92,rating:1470.2},{id:91,rating:1352.6},{id:90,rating:1235.0},{id:89,rating:1164.4},
+{id:88,rating:1093.9},{id:87,rating:1023.3},{id:86,rating:952.7},{id:85,rating:882.2},
+{id:84,rating:811.6},{id:83,rating:741.0},{id:82,rating:670.4},{id:81,rating:599.9},
+{id:80,rating:529.3},{id:79,rating:494.0},{id:78,rating:458.7},{id:77,rating:423.4},
+{id:76,rating:388.1},{id:75,rating:352.9},{id:74,rating:317.6},{id:73,rating:282.3},
+{id:72,rating:247.0},{id:71,rating:211.7},{id:70,rating:176.4},{id:69,rating:158.8},
+{id:68,rating:141.1},{id:67,rating:123.5},{id:66,rating:105.8},{id:65,rating:88.2},
+{id:64,rating:70.6},{id:63,rating:52.9},{id:62,rating:35.3},{id:61,rating:17.6},
+{id:60,rating:0},{id:59,rating:-17.6},{id:58,rating:-35.3},{id:57,rating:-52.9},
+{id:56,rating:-70.6},{id:55,rating:-88.2},{id:54,rating:-105.8},{id:53,rating:-123.5},
+{id:52,rating:-141.1},{id:51,rating:-158.8},{id:50,rating:-176.4},{id:49,rating:-211.7},
+{id:48,rating:-247.0},{id:47,rating:-282.3},{id:46,rating:-317.6},{id:45,rating:-352.9},
+{id:44,rating:-388.1},{id:43,rating:-423.4},{id:42,rating:-458.7},{id:41,rating:-494.0},
+{id:40,rating:-529.3},{id:39,rating:-599.9},{id:38,rating:-670.4},{id:37,rating:-741.0},
+{id:36,rating:-811.6},{id:35,rating:-882.2},{id:34,rating:-952.7},{id:33,rating:-1023.3},
+{id:32,rating:-1093.9},{id:31,rating:-1164.4},{id:30,rating:-1235.0}])
 
 
 PlayerDevTrait.delete_all
-PlayerDevTrait.create([{id:3,rating:0.6},{id:2,rating:0.3},{id:1,rating:0.05},{id:0,rating:-0.2}])
+PlayerDevTrait.create([{id:3,rating:0.6},{id:2,rating:0.3},{id:1,rating:0.1},{id:0,rating:0.0}])
 
 
 PlayerAge.delete_all
-PlayerAge.create([{id:20,rating:4.2},{id:21,rating:3.3},{id:22,rating:2.4},
-{id:23,rating:1.5},{id:24,rating:0.6},{id:25,rating:0.3},
-{id:26,rating:0},{id:27,rating:-0.03},{id:28,rating:-0.1},
-{id:29,rating:-0.2},{id:30,rating:-0.3},{id:31,rating:-0.45},
-{id:32,rating:-0.6},{id:33,rating:-0.8},{id:34,rating:-1},
-{id:35,rating:-1.2},{id:36,rating:-1.4},{id:37,rating:-1.5},
-{id:38,rating:-1.55},{id:39,rating:-1.6},{id:40,rating:-1.63}])
+PlayerAge.create([{id:20,rating:4},{id:21,rating:3.6},{id:22,rating:3.2},
+{id:23,rating:2.8},{id:24,rating:2.4},{id:25,rating:2},{id:26,rating:1.6},
+{id:27,rating:1.2},{id:28,rating:0.8},{id:29,rating:0.4},{id:30,rating:0},
+{id:31,rating:-0.2},{id:32,rating:-0.4},{id:33,rating:-0.6},{id:34,rating:-0.8},
+{id:35,rating:-1},{id:36,rating:-1.2},{id:37,rating:-1.4},{id:38,rating:-1.6},
+{id:39,rating:-1.8},{id:40,rating:-2},{id:41,rating:-2.2},{id:42,rating:-2.4},
+{id:43,rating:-2.6},{id:44,rating:-2.8},{id:45,rating:-3},{id:46,rating:-3.2},
+{id:47,rating:-3.4},{id:48,rating:-3.6},{id:49,rating:-3.8},{id:50,rating:-4}])
 
 
 PlayerPosition.delete_all
-PlayerPosition.create([{id:"QB",rating:1.6},{id:"HB",rating:0.25},{id:"FB",rating:-0.65},
-{id:"WR",rating:0.27},{id:"TE",rating:0.21},{id:"LT",rating:0.17},
-{id:"LG",rating:0.1},{id:"C",rating:0.13},{id:"RG",rating:0.1},
-{id:"RT",rating:0.1},{id:"LE",rating:0.27},{id:"DT",rating:0.22},
-{id:"RE",rating:0.29},{id:"LOLB",rating:0.22},{id:"MLB",rating:0.29},
-{id:"ROLB",rating:0.27},{id:"CB",rating:0.25},{id:"SS",rating:0.21},
-{id:"FS",rating:0.19},{id:"K",rating:-0.85},{id:"P",rating:-0.9}])
+PlayerPosition.create([{id:"QB",rating:1},{id:"HB",rating:0.25},{id:"FB",rating:-0.5},
+{id:"WR",rating:0.3},{id:"TE",rating:0.2},{id:"LT",rating:0.15},{id:"LG",rating:0.1},
+{id:"C",rating:0.12},{id:"RG",rating:0.1},{id:"RT",rating:0.15},{id:"LE",rating:0.25},
+{id:"DT",rating:0.2},{id:"RE",rating:0.25},{id:"LOLB",rating:0.25},{id:"MLB",rating:0.3},
+{id:"ROLB",rating:0.25},{id:"CB",rating:0.3},{id:"SS",rating:0.2},{id:"FS",rating:0.2},
+{id:"K",rating:-0.5},{id:"P",rating:-0.5}])
 
 TeamRecord.delete_all
 TeamRecord.create([
