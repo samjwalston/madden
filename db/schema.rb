@@ -10,13 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181222185851) do
+ActiveRecord::Schema.define(version: 20190727223837) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "leagues", id: :bigint, default: nil, force: :cascade do |t|
     t.string "name"
+  end
+
+  create_table "player_ages", id: :integer, default: nil, force: :cascade do |t|
+    t.decimal "rating"
+  end
+
+  create_table "player_dev_traits", id: :integer, default: nil, force: :cascade do |t|
+    t.decimal "rating"
+  end
+
+  create_table "player_overalls", id: :integer, default: nil, force: :cascade do |t|
+    t.decimal "rating"
+  end
+
+  create_table "player_positions", id: :string, force: :cascade do |t|
+    t.decimal "rating"
   end
 
   create_table "players", id: :string, force: :cascade do |t|
@@ -219,6 +235,13 @@ ActiveRecord::Schema.define(version: 20181222185851) do
     t.string "conference_name"
     t.string "division_name"
     t.string "team_name"
+  end
+
+  create_table "team_records", id: :bigint, default: nil, force: :cascade do |t|
+    t.integer "wins"
+    t.integer "losses"
+    t.integer "ties"
+    t.decimal "percentage"
   end
 
   create_table "teams", id: :string, force: :cascade do |t|

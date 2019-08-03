@@ -53,6 +53,7 @@ GEM
     ffi (1.9.25)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
+    humanize (2.1.1)
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
     jbuilder (2.7.0)
@@ -173,6 +174,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord-import (~> 0.27.0)
   dotenv-rails (~> 2.5)
+  humanize
   jbuilder (~> 2.7)
   listen (~> 3.1)
   pg (~> 1.1)

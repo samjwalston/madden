@@ -1,0 +1,2 @@
+class PlayerPosition < ApplicationRecord
+end

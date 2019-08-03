@@ -1,0 +1,2 @@
+class PlayerDevTrait < ApplicationRecord
+end

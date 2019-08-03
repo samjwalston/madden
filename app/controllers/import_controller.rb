@@ -3,8 +3,9 @@ class ImportController < ApplicationController
 
 
   def teams
-    Import::Team.perform_later(safe_params)
-    head :ok
+    inspect_data
+    # Import::Team.perform_later(safe_params)
+    # head :ok
   end
 
   def standings
@@ -12,13 +13,15 @@ class ImportController < ApplicationController
   end
 
   def rosters
-    Import::Roster.perform_later(safe_params)
-    head :ok
+    inspect_data
+    # Import::Roster.perform_later(safe_params)
+    # head :ok
   end
 
   def schedules
-    Import::Schedule.perform_later(safe_params)
-    head :ok
+    inspect_data
+    # Import::Schedule.perform_later(safe_params)
+    # head :ok
   end
 
 
@@ -26,7 +29,7 @@ class ImportController < ApplicationController
 
   def inspect_data
     puts "==="
-    puts params.inspect
+    puts safe_params.inspect
     puts "==="
 
     head :ok
