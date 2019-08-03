@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby '2.4.1'
 
-gem 'rails', '~> 5.1.4'
+gem 'rails', '~> 5.1.6'
 gem 'pg', '~> 1.1'
 gem 'puma', '~> 3.12'
 gem 'resque', '~> 1.27'

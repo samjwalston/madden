@@ -180,7 +180,7 @@ DEPENDENCIES
   pg (~> 1.1)
   puma (~> 3.12)
   rack-cors (~> 1.0)
-  rails (~> 5.1.4)
+  rails (~> 5.1.6)
   redis (~> 4.0)
   resque (~> 1.27)
   sassc-rails (~> 1.3)
