@@ -11,6 +11,7 @@ class CreatePlayers < ActiveRecord::Migration[5.1]
       t.integer :birth_year
       t.integer :contract_years_left
       t.integer :contract_length
+      t.integer :desired_length
       t.integer :draft_pick
       t.integer :draft_round
       t.integer :height
@@ -122,7 +123,6 @@ class CreatePlayers < ActiveRecord::Migration[5.1]
       t.money :contract_salary
       t.money :desired_bonus
       t.money :desired_salary
-      t.money :desired_length
       t.string :college
       t.string :first_name
       t.string :home_town
