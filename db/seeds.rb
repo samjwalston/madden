@@ -51,46 +51,48 @@ PlayerPosition.create([{id:"QB",rating:1},{id:"HB",rating:0.25},{id:"FB",rating:
 {id:"ROLB",rating:0.25},{id:"CB",rating:0.3},{id:"SS",rating:0.2},{id:"FS",rating:0.2},
 {id:"K",rating:-0.5},{id:"P",rating:-0.5}])
 
+
 TeamRecord.delete_all
 TeamRecord.create([
- {id: 1009909760, wins: 187, losses: 102, ties: 1},
- {id: 1009909761, wins: 168, losses: 119, ties: 0},
- {id: 1009909762, wins: 145, losses: 131, ties: 2},
- {id: 1009909763, wins: 168, losses: 111, ties: 0},
- {id: 1009909764, wins: 207, losses: 84, ties: 0},
- {id: 1009909765, wins: 109, losses: 141, ties: 2},
- {id: 1009909766, wins: 132, losses: 144, ties: 0},
- {id: 1009909767, wins: 140, losses: 133, ties: 1},
- {id: 1009909800, wins: 152, losses: 126, ties: 0},
- {id: 1009909801, wins: 178, losses: 102, ties: 0},
- {id: 1009909802, wins: 170, losses: 114, ties: 0},
- {id: 1009909803, wins: 170, losses: 114, ties: 0},
- {id: 1009909804, wins: 167, losses: 111, ties: 0},
- {id: 1009909805, wins: 173, losses: 114, ties: 1},
- {id: 1009909806, wins: 153, losses: 124, ties: 1},
- {id: 1009909808, wins: 166, losses: 119, ties: 0},
- {id: 1009909810, wins: 103, losses: 87, ties: 0},
- {id: 1009909811, wins: 139, losses: 136, ties: 1},
- {id: 1009909812, wins: 135, losses: 138, ties: 0},
- {id: 1009909814, wins: 193, losses: 92, ties: 3},
- {id: 1009909815, wins: 111, losses: 88, ties: 0},
- {id: 1009909816, wins: 213, losses: 86, ties: 0},
- {id: 1009909817, wins: 140, losses: 136, ties: 0},
- {id: 1009909818, wins: 139, losses: 137, ties: 0},
- {id: 1009909819, wins: 129, losses: 60, ties: 1},
- {id: 1009909820, wins: 150, losses: 127, ties: 1},
- {id: 1009909821, wins: 155, losses: 122, ties: 0},
- {id: 1009909822, wins: 182, losses: 102, ties: 0},
- {id: 1009909823, wins: 200, losses: 91, ties: 1},
- {id: 1009909824, wins: 75, losses: 66, ties: 0},
- {id: 1009909825, wins: 162, losses: 117, ties: 0},
- {id: 1009909826, wins: 187, losses: 95, ties: 0}
+ {id: 1008992256, wins: 187, losses: 102, ties: 1},
+ {id: 1008992257, wins: 168, losses: 119, ties: 0},
+ {id: 1008992258, wins: 145, losses: 131, ties: 2},
+ {id: 1008992259, wins: 168, losses: 111, ties: 0},
+ {id: 1008992260, wins: 207, losses: 84, ties: 0},
+ {id: 1008992261, wins: 109, losses: 141, ties: 2},
+ {id: 1008992262, wins: 132, losses: 144, ties: 0},
+ {id: 1008992263, wins: 140, losses: 133, ties: 1},
+ {id: 1008992296, wins: 152, losses: 126, ties: 0},
+ {id: 1008992297, wins: 178, losses: 102, ties: 0},
+ {id: 1008992298, wins: 170, losses: 114, ties: 0},
+ {id: 1008992299, wins: 170, losses: 114, ties: 0},
+ {id: 1008992300, wins: 167, losses: 111, ties: 0},
+ {id: 1008992301, wins: 173, losses: 114, ties: 1},
+ {id: 1008992302, wins: 153, losses: 124, ties: 1},
+ {id: 1008992304, wins: 166, losses: 119, ties: 0},
+ {id: 1008992306, wins: 103, losses: 87, ties: 0},
+ {id: 1008992307, wins: 139, losses: 136, ties: 1},
+ {id: 1008992308, wins: 135, losses: 138, ties: 0},
+ {id: 1008992310, wins: 193, losses: 92, ties: 3},
+ {id: 1008992311, wins: 111, losses: 88, ties: 0},
+ {id: 1008992312, wins: 213, losses: 86, ties: 0},
+ {id: 1008992313, wins: 140, losses: 136, ties: 0},
+ {id: 1008992314, wins: 139, losses: 137, ties: 0},
+ {id: 1008992315, wins: 129, losses: 60, ties: 1},
+ {id: 1008992316, wins: 150, losses: 127, ties: 1},
+ {id: 1008992317, wins: 155, losses: 122, ties: 0},
+ {id: 1008992318, wins: 182, losses: 102, ties: 0},
+ {id: 1008992319, wins: 200, losses: 91, ties: 1},
+ {id: 1008992320, wins: 75, losses: 66, ties: 0},
+ {id: 1008992321, wins: 162, losses: 117, ties: 0},
+ {id: 1008992322, wins: 187, losses: 95, ties: 0}
 ])
 
 TeamRecord.order(:id).each do |record|
   record.percentage = ((record.wins / (record.wins + record.losses + record.ties).to_d) * 100).round(1)
   record.save
 end
+
 
 PlayerDraft.delete_all
 PlayerDraft.create([
