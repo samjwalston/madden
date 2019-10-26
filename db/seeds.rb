@@ -44,12 +44,12 @@ PlayerAge.create([{id:20,rating:4},{id:21,rating:3.6},{id:22,rating:3.2},
 
 
 PlayerPosition.delete_all
-PlayerPosition.create([{id:"QB",rating:1},{id:"HB",rating:0.25},{id:"FB",rating:-0.5},
-{id:"WR",rating:0.3},{id:"TE",rating:0.2},{id:"LT",rating:0.15},{id:"LG",rating:0.1},
-{id:"C",rating:0.12},{id:"RG",rating:0.1},{id:"RT",rating:0.15},{id:"LE",rating:0.25},
-{id:"DT",rating:0.2},{id:"RE",rating:0.25},{id:"LOLB",rating:0.25},{id:"MLB",rating:0.3},
-{id:"ROLB",rating:0.25},{id:"CB",rating:0.3},{id:"SS",rating:0.2},{id:"FS",rating:0.2},
-{id:"K",rating:-0.5},{id:"P",rating:-0.5}])
+PlayerPosition.create([{id:"QB",rating:1},{id:"HB",rating:0.15},{id:"FB",rating:0.01},
+{id:"WR",rating:0.25},{id:"TE",rating:0.15},{id:"LT",rating:0.15},{id:"LG",rating:0.1},
+{id:"C",rating:0.12},{id:"RG",rating:0.1},{id:"RT",rating:0.15},{id:"LE",rating:0.12},
+{id:"DT",rating:0.1},{id:"RE",rating:0.12},{id:"LOLB",rating:0.3},{id:"MLB",rating:0.2},
+{id:"ROLB",rating:0.3},{id:"CB",rating:0.25},{id:"SS",rating:0.15},{id:"FS",rating:0.15},
+{id:"K",rating:0.01},{id:"P",rating:0.01}])
 
 
 TeamRecord.delete_all
