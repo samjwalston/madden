@@ -85,10 +85,6 @@ ActiveRecord::Schema.define(version: 20200327212230) do
     t.decimal "rating"
   end
 
-  create_table "leagues", id: :bigint, default: nil, force: :cascade do |t|
-    t.string "name"
-  end
-
   create_table "overalls", id: :integer, default: nil, force: :cascade do |t|
     t.decimal "rating"
   end
@@ -101,8 +97,6 @@ ActiveRecord::Schema.define(version: 20200327212230) do
   end
 
   create_table "players", id: :string, force: :cascade do |t|
-    t.bigint "league_id"
-    t.bigint "player_id"
     t.bigint "team_id"
     t.integer "age"
     t.integer "birth_day"
@@ -110,6 +104,7 @@ ActiveRecord::Schema.define(version: 20200327212230) do
     t.integer "birth_year"
     t.integer "contract_years_left"
     t.integer "contract_length"
+    t.integer "desired_length"
     t.integer "draft_pick"
     t.integer "draft_round"
     t.integer "height"
@@ -220,7 +215,6 @@ ActiveRecord::Schema.define(version: 20200327212230) do
     t.money "contract_salary", scale: 2
     t.money "desired_bonus", scale: 2
     t.money "desired_salary", scale: 2
-    t.integer "desired_length"
     t.string "college"
     t.string "first_name"
     t.string "home_town"
@@ -233,8 +227,6 @@ ActiveRecord::Schema.define(version: 20200327212230) do
   end
 
   create_table "schedules", id: :string, force: :cascade do |t|
-    t.bigint "league_id"
-    t.bigint "schedule_id"
     t.bigint "away_team_id"
     t.bigint "home_team_id"
     t.integer "away_score"
@@ -256,8 +248,6 @@ ActiveRecord::Schema.define(version: 20200327212230) do
   end
 
   create_table "teams", id: :string, force: :cascade do |t|
-    t.bigint "league_id"
-    t.bigint "team_id"
     t.integer "def_scheme"
     t.integer "injury_count"
     t.integer "off_scheme"

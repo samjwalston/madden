@@ -13,7 +13,7 @@ class Import::PlayerArchetypes < ApplicationService
   private
 
   def get_ratings(player)
-    archetypes = Archetype.where(position: player[:position])
+    archetypes = Archetype.where(position: get_positions(player[:position]))
 
     archetypes.map do |archetype|
       attributes = archetype.attributes.dup.keep_if{|k,v| k.include?("rating") && v > 0}.map{|k,v| [k.to_sym, v.to_d / 100]}.to_h
@@ -29,6 +29,28 @@ class Import::PlayerArchetypes < ApplicationService
         overall: [99, rating.round].min,
         rating: rating
       }
+    end
+  end
+
+  def get_positions(position)
+    if position.in?(["FB", "TE"])
+      ["FB", "TE"]
+    elsif position.in?(["LT", "LG", "C", "RG", "RT"])
+      ["LT", "LG", "C", "RG", "RT"]
+    elsif position.in?(["LE", "RE"])
+      ["LE", "RE", "DT", "LOLB", "ROLB"]
+    elsif position.in?(["DT"])
+      ["LE", "RE", "DT"]
+    elsif position.in?(["LOLB", "ROLB"])
+      ["LE", "RE", "LOLB", "ROLB"]
+    elsif position.in?(["MLB"])
+      ["LOLB", "ROLB", "MLB"]
+    elsif position.in?(["CB", "FS", "SS"])
+      ["CB", "FS", "SS"]
+    elsif position.in?(["K", "P"])
+      ["K", "P"]
+    else
+      [position]
     end
   end
 end
