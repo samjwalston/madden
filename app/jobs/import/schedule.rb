@@ -1,7 +1,7 @@
 class Import::Schedule < ApplicationJob
   def perform(data)
     schedules = data["gameScheduleInfoList"].map do |schedule|
-      format_data(schedule)
+      format_data(schedule, {})
     end
 
     Schedule.import(schedules, on_duplicate_key_update: :all)

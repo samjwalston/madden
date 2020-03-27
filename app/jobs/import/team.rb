@@ -1,7 +1,7 @@
 class Import::Team < ApplicationJob
   def perform(data)
     teams = data["leagueTeamInfoList"].map do |team|
-      format_data(team)
+      format_data(team, {})
     end
 
     Team.import(teams, on_duplicate_key_update: :all)
