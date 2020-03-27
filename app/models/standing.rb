@@ -1,2 +1,0 @@
-class Standing < ApplicationRecord
-end

@@ -1,0 +1,2 @@
+class DraftPosition < ApplicationRecord
+end

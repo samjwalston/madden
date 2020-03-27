@@ -13,6 +13,8 @@ class Import::Team < ApplicationJob
   private
 
   def format_data(attributes, parameters, details = {})
+    details[:id] = attributes["teamId"]
+
     attributes.merge(parameters).each do |key, value|
       key = key.to_s.underscore
 
@@ -20,8 +22,6 @@ class Import::Team < ApplicationJob
         details[key.to_sym] = value
       end
     end
-
-    details[:id] = [parameters[:league_id], details[:team_id]].join(":")
 
     Team.new(details)
   end

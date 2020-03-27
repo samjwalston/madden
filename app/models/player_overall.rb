@@ -1,2 +1,0 @@
-class PlayerOverall < ApplicationRecord
-end

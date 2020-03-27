@@ -1,0 +1,2 @@
+class DevTrait < ApplicationRecord
+end

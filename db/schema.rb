@@ -10,32 +10,93 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190806020655) do
+ActiveRecord::Schema.define(version: 20200327212230) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "ages", id: :integer, default: nil, force: :cascade do |t|
+    t.decimal "rating"
+  end
+
+  create_table "archetypes", id: :integer, default: nil, force: :cascade do |t|
+    t.string "position"
+    t.string "name"
+    t.integer "accel_rating", default: 0
+    t.integer "agility_rating", default: 0
+    t.integer "aware_rating", default: 0
+    t.integer "b_cv_rating", default: 0
+    t.integer "block_shed_rating", default: 0
+    t.integer "break_sack_rating", default: 0
+    t.integer "break_tackle_rating", default: 0
+    t.integer "carry_rating", default: 0
+    t.integer "catch_rating", default: 0
+    t.integer "c_it_rating", default: 0
+    t.integer "throw_acc_deep_rating", default: 0
+    t.integer "route_run_deep_rating", default: 0
+    t.integer "elusive_rating", default: 0
+    t.integer "finesse_moves_rating", default: 0
+    t.integer "hit_power_rating", default: 0
+    t.integer "impact_block_rating", default: 0
+    t.integer "injury_rating", default: 0
+    t.integer "juke_move_rating", default: 0
+    t.integer "jump_rating", default: 0
+    t.integer "kick_acc_rating", default: 0
+    t.integer "kick_power_rating", default: 0
+    t.integer "kick_ret_rating", default: 0
+    t.integer "lead_block_rating", default: 0
+    t.integer "man_cover_rating", default: 0
+    t.integer "throw_acc_mid_rating", default: 0
+    t.integer "route_run_med_rating", default: 0
+    t.integer "pass_block_rating", default: 0
+    t.integer "pass_block_finesse_rating", default: 0
+    t.integer "pass_block_power_rating", default: 0
+    t.integer "play_action_rating", default: 0
+    t.integer "play_rec_rating", default: 0
+    t.integer "power_moves_rating", default: 0
+    t.integer "press_rating", default: 0
+    t.integer "pursuit_rating", default: 0
+    t.integer "release_rating", default: 0
+    t.integer "run_block_rating", default: 0
+    t.integer "run_block_finesse_rating", default: 0
+    t.integer "run_block_power_rating", default: 0
+    t.integer "throw_acc_short_rating", default: 0
+    t.integer "route_run_short_rating", default: 0
+    t.integer "spec_catch_rating", default: 0
+    t.integer "speed_rating", default: 0
+    t.integer "spin_move_rating", default: 0
+    t.integer "stamina_rating", default: 0
+    t.integer "stiff_arm_rating", default: 0
+    t.integer "strength_rating", default: 0
+    t.integer "tackle_rating", default: 0
+    t.integer "throw_on_run_rating", default: 0
+    t.integer "throw_power_rating", default: 0
+    t.integer "throw_under_pressure_rating", default: 0
+    t.integer "tough_rating", default: 0
+    t.integer "truck_rating", default: 0
+    t.integer "zone_cover_rating", default: 0
+  end
+
+  create_table "dev_traits", id: :integer, default: nil, force: :cascade do |t|
+    t.decimal "rating"
+  end
+
+  create_table "draft_positions", id: :integer, default: nil, force: :cascade do |t|
+    t.decimal "rating"
+  end
 
   create_table "leagues", id: :bigint, default: nil, force: :cascade do |t|
     t.string "name"
   end
 
-  create_table "player_ages", id: :integer, default: nil, force: :cascade do |t|
+  create_table "overalls", id: :integer, default: nil, force: :cascade do |t|
     t.decimal "rating"
   end
 
-  create_table "player_dev_traits", id: :integer, default: nil, force: :cascade do |t|
-    t.decimal "rating"
-  end
-
-  create_table "player_drafts", id: :integer, default: nil, force: :cascade do |t|
-    t.decimal "rating"
-  end
-
-  create_table "player_overalls", id: :integer, default: nil, force: :cascade do |t|
-    t.decimal "rating"
-  end
-
-  create_table "player_positions", id: :string, force: :cascade do |t|
+  create_table "player_archetypes", id: :string, force: :cascade do |t|
+    t.bigint "player_id"
+    t.integer "archetype_id"
+    t.integer "overall"
     t.decimal "rating"
   end
 
@@ -159,7 +220,7 @@ ActiveRecord::Schema.define(version: 20190806020655) do
     t.money "contract_salary", scale: 2
     t.money "desired_bonus", scale: 2
     t.money "desired_salary", scale: 2
-    t.money "desired_length", scale: 2
+    t.integer "desired_length"
     t.string "college"
     t.string "first_name"
     t.string "home_town"
@@ -185,11 +246,13 @@ ActiveRecord::Schema.define(version: 20190806020655) do
     t.boolean "is_game_of_the_week"
   end
 
-  create_table "team_records", id: :bigint, default: nil, force: :cascade do |t|
-    t.integer "wins"
-    t.integer "losses"
-    t.integer "ties"
-    t.decimal "percentage"
+  create_table "scheme_archetypes", id: :integer, default: nil, force: :cascade do |t|
+    t.integer "scheme_id"
+    t.integer "archetype_id"
+  end
+
+  create_table "schemes", id: :integer, default: nil, force: :cascade do |t|
+    t.string "name"
   end
 
   create_table "teams", id: :string, force: :cascade do |t|

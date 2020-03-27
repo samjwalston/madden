@@ -1,2 +1,0 @@
-class PlayerPosition < ApplicationRecord
-end

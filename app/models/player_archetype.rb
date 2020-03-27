@@ -1,0 +1,2 @@
+class PlayerArchetype < ApplicationRecord
+end

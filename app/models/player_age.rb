@@ -1,2 +1,0 @@
-class PlayerAge < ApplicationRecord
-end
