@@ -1,7 +1,7 @@
 class CreatePlayers < ActiveRecord::Migration[5.1]
   def up
     create_table :players, id: false do |t|
-      t.string :id, primary_key: true
+      t.bigint :id, primary_key: true
       t.bigint :team_id
       t.integer :age
       t.integer :birth_day

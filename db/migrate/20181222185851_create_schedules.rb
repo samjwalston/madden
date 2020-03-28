@@ -1,7 +1,7 @@
 class CreateSchedules < ActiveRecord::Migration[5.1]
   def up
     create_table :schedules, id: false do |t|
-      t.string :id, primary_key: true
+      t.bigint :id, primary_key: true
       t.bigint :away_team_id
       t.bigint :home_team_id
       t.integer :away_score

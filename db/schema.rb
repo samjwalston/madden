@@ -96,7 +96,7 @@ ActiveRecord::Schema.define(version: 20200327212230) do
     t.decimal "rating"
   end
 
-  create_table "players", id: :string, force: :cascade do |t|
+  create_table "players", id: :bigint, default: nil, force: :cascade do |t|
     t.bigint "team_id"
     t.integer "age"
     t.integer "birth_day"
@@ -226,7 +226,7 @@ ActiveRecord::Schema.define(version: 20200327212230) do
     t.boolean "is_on_practice_squad"
   end
 
-  create_table "schedules", id: :string, force: :cascade do |t|
+  create_table "schedules", id: :bigint, default: nil, force: :cascade do |t|
     t.bigint "away_team_id"
     t.bigint "home_team_id"
     t.integer "away_score"
@@ -247,7 +247,7 @@ ActiveRecord::Schema.define(version: 20200327212230) do
     t.string "name"
   end
 
-  create_table "teams", id: :string, force: :cascade do |t|
+  create_table "teams", id: :bigint, default: nil, force: :cascade do |t|
     t.integer "def_scheme"
     t.integer "injury_count"
     t.integer "off_scheme"

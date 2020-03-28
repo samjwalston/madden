@@ -3,5 +3,7 @@ class StartNewSeason < ApplicationService
     Schedule.delete_all
     Player.delete_all
     PlayerArchetype.delete_all
+
+    nil
   end
 end

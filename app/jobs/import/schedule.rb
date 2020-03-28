@@ -1,7 +1,7 @@
 class Import::Schedule < ApplicationJob
   def perform(data)
     schedules = data["gameScheduleInfoList"].map do |schedule|
-      format_data(schedule, {})
+      format_data(schedule)
     end
 
     Schedule.import(schedules, on_duplicate_key_update: :all)
@@ -10,10 +10,10 @@ class Import::Schedule < ApplicationJob
 
   private
 
-  def format_data(attributes, parameters, details = {})
-    details[:id] = attributes["scheduleId"]
+  def format_data(attributes)
+    details = {id: attributes["scheduleId"]}
 
-    attributes.merge(parameters).each do |key, value|
+    attributes.each do |key, value|
       key = key.to_s.underscore
 
       if Schedule.column_names.include?(key)

@@ -11,8 +11,8 @@ class Import::Roster < ApplicationJob
 
   private
 
-  def format_data(attributes, parameters, details = {})
-    details[:id] = attributes["rosterId"]
+  def format_data(attributes, parameters)
+    details = {id: attributes["rosterId"]}
 
     attributes.merge(parameters).each do |key, value|
       key = key.to_s.underscore
