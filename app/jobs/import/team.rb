@@ -16,7 +16,7 @@ class Import::Team < ApplicationJob
     attributes.each do |key, value|
       key = key.to_s.underscore
 
-      if ::::Team.column_names.include?(key)
+      if ::Team.column_names.include?(key)
         details[key.to_sym] = value
       end
     end
