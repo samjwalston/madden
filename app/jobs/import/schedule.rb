@@ -4,7 +4,7 @@ class Import::Schedule < ApplicationJob
       format_data(schedule)
     end
 
-    Schedule.import(schedules, on_duplicate_key_update: :all)
+    ::Schedule.import(schedules, on_duplicate_key_update: :all)
   end
 
 
@@ -16,11 +16,11 @@ class Import::Schedule < ApplicationJob
     attributes.each do |key, value|
       key = key.to_s.underscore
 
-      if Schedule.column_names.include?(key)
+      if ::Schedule.column_names.include?(key)
         details[key.to_sym] = value
       end
     end
 
-    Schedule.new(details)
+    ::Schedule.new(details)
   end
 end

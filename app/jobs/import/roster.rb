@@ -4,7 +4,7 @@ class Import::Roster < ApplicationJob
       format_data(player, {team_id: data["team_id"]})
     end
 
-    Player.import(players, on_duplicate_key_update: :all)
+    ::Player.import(players, on_duplicate_key_update: :all)
     Import::PlayerArchetypes.call(players)
   end
 
@@ -17,11 +17,11 @@ class Import::Roster < ApplicationJob
     attributes.merge(parameters).each do |key, value|
       key = key.to_s.underscore
 
-      if Player.column_names.include?(key)
+      if ::Player.column_names.include?(key)
         details[key.to_sym] = value
       end
     end
 
-    Player.new(details)
+    ::Player.new(details)
   end
 end

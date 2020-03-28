@@ -4,7 +4,7 @@ class Import::Team < ApplicationJob
       format_data(team)
     end
 
-    Team.import(teams, on_duplicate_key_update: :all)
+    ::Team.import(teams, on_duplicate_key_update: :all)
   end
 
 
@@ -16,11 +16,11 @@ class Import::Team < ApplicationJob
     attributes.each do |key, value|
       key = key.to_s.underscore
 
-      if Team.column_names.include?(key)
+      if ::::Team.column_names.include?(key)
         details[key.to_sym] = value
       end
     end
 
-    Team.new(details)
+    ::Team.new(details)
   end
 end
