@@ -18,7 +18,7 @@ class Import::PlayerArchetypes < ApplicationService
     archetypes.map do |archetype|
       attributes = archetype.attributes.dup.keep_if{|k,v| k.include?("rating") && v > 0}.map{|k,v| [k.to_sym, v.to_d / 100]}.to_h
       rating = attributes.map do |key, value|
-        line = (player[key] / 90.to_d)
+        line = (player[key] / get_denominator(archetype.position))
         (player[key] * (line < 1 ? (line * line) : line)) * value
       end.sum.round(2)
 
@@ -51,6 +51,19 @@ class Import::PlayerArchetypes < ApplicationService
       ["K", "P"]
     else
       [position]
+    end
+  end
+
+  def get_denominator(position)
+    case position
+    when "QB", "HB", "WR"
+      90.to_d
+    when "FB", "TE"
+      70.to_d
+    when "LT", "C", "RT", "LE", "RE", "DT", "MLB", "CB", "K", "P"
+      85.to_d
+    else
+      80.to_d
     end
   end
 end
