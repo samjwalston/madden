@@ -1,0 +1,2 @@
+class SchemePosition < ApplicationRecord
+end

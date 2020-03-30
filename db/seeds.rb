@@ -16,13 +16,4 @@ Import::DraftPositions.call
 Import::Archetypes.call
 Import::Schemes.call
 Import::SchemeArchetypes.call
-
-
-# DEPRECATED - Moving to using ratings per team scheme?
-# PlayerPosition.delete_all
-# PlayerPosition.create([{id:"QB",rating:5},{id:"HB",rating:0.57},{id:"FB",rating:0.22},
-# {id:"WR",rating:1.13},{id:"TE",rating:0.46},{id:"LT",rating:1.13},{id:"LG",rating:0.57},
-# {id:"C",rating:0.68},{id:"RG",rating:0.57},{id:"RT",rating:0.91},{id:"LE",rating:0.46},
-# {id:"DT",rating:0.34},{id:"RE",rating:0.46},{id:"LOLB",rating:1.59},{id:"MLB",rating:0.68},
-# {id:"ROLB",rating:1.59},{id:"CB",rating:1.48},{id:"SS",rating:0.68},{id:"FS",rating:0.68},
-# {id:"K",rating:0.22},{id:"P",rating:0.22}])
+Import::SchemePositions.call

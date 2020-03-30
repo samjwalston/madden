@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200327212230) do
+ActiveRecord::Schema.define(version: 20200329220624) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -241,6 +241,13 @@ ActiveRecord::Schema.define(version: 20200327212230) do
   create_table "scheme_archetypes", id: :integer, default: nil, force: :cascade do |t|
     t.integer "scheme_id"
     t.integer "archetype_id"
+  end
+
+  create_table "scheme_positions", id: :integer, default: nil, force: :cascade do |t|
+    t.integer "scheme_id"
+    t.string "position"
+    t.integer "rank"
+    t.decimal "rating"
   end
 
   create_table "schemes", id: :integer, default: nil, force: :cascade do |t|
