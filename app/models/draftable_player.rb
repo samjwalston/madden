@@ -1,0 +1,2 @@
+class DraftablePlayer < ApplicationRecord
+end

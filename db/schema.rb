@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200329220624) do
+ActiveRecord::Schema.define(version: 20200331013603) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -83,6 +83,9 @@ ActiveRecord::Schema.define(version: 20200329220624) do
 
   create_table "draft_positions", id: :integer, default: nil, force: :cascade do |t|
     t.decimal "rating"
+  end
+
+  create_table "draftable_players", id: :bigint, default: nil, force: :cascade do |t|
   end
 
   create_table "overalls", id: :integer, default: nil, force: :cascade do |t|
