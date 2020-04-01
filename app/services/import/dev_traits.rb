@@ -9,8 +9,8 @@ class Import::DevTraits < ApplicationService
 
   def values
     [
-      {id: 3, rating: 9.00},
-      {id: 2, rating: 3.00},
+      {id: 3, rating: 6.00},
+      {id: 2, rating: 2.00},
       {id: 1, rating: 1.00},
       {id: 0, rating: 0.00}
     ]
