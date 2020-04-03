@@ -18,6 +18,8 @@ class CreatePlayers < ActiveRecord::Migration[5.1]
       t.integer :contract_year
       t.integer :contract_years_left
       t.money :cap_hit
+      t.money :cap_savings
+      t.money :cap_penalty
       t.boolean :is_injured_reserve
     end
   end

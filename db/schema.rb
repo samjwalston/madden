@@ -45,6 +45,8 @@ ActiveRecord::Schema.define(version: 20200402232757) do
     t.integer "contract_year"
     t.integer "contract_years_left"
     t.money "cap_hit", scale: 2
+    t.money "cap_savings", scale: 2
+    t.money "cap_penalty", scale: 2
     t.boolean "is_injured_reserve"
   end
 
