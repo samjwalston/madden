@@ -1,2 +1,0 @@
-class SchemeArchetype < ApplicationRecord
-end

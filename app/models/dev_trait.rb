@@ -1,2 +1,0 @@
-class DevTrait < ApplicationRecord
-end

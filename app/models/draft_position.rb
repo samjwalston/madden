@@ -1,2 +1,0 @@
-class DraftPosition < ApplicationRecord
-end
