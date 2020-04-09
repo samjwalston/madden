@@ -1,12 +1,12 @@
 class Import::Players < ApplicationService
   require 'csv'
 
-  def call(current_season)
+  def call
     ::Player.delete_all
     ::Contract.delete_all
     ::Archetype.delete_all
 
-    players, contracts, archetypes = get_values(current_season)
+    players, contracts, archetypes = get_values
 
     players.each_slice(100){|values| ::Player.create(values)}
     contracts.each_slice(100){|values| ::Contract.create(values)}
@@ -18,7 +18,7 @@ class Import::Players < ApplicationService
 
   private
 
-  def get_values(current_season)
+  def get_values
     players = []
     contracts = []
     archetypes = []
@@ -29,9 +29,10 @@ class Import::Players < ApplicationService
     archetype_id = 0
 
     CSV.foreach(Rails.root.join("players.csv"), {headers: true, header_converters: :symbol}) do |row|
-      next if row[:age].to_i.zero? || row[:overallrating].to_i.zero?
+      next unless row[:contractstatus].in?(["Signed", "FreeAgent"])
 
       player_id += 1
+      cap_hit = 0
       cap_savings = 0
       cap_penalty = 0
 
@@ -40,6 +41,7 @@ class Import::Players < ApplicationService
         contract_id += 1
 
         if row[:contractyear].to_i == index
+          cap_hit = ((row["contractsalary#{index}".to_sym].to_i + row["contractbonus#{index}".to_sym].to_i) * 10_000)
           cap_savings = ((row["contractsalary#{index}".to_sym].to_i - row["contractbonus#{index}".to_sym].to_i) * 10_000)
         elsif row[:contractyear].to_i < index
           cap_penalty += (row["contractbonus#{index}".to_sym].to_i * 10_000)
@@ -68,7 +70,7 @@ class Import::Players < ApplicationService
 
       players << {
         id: player_id,
-        team_id: (row[:teamindex].to_i + 1),
+        team_id: row[:teamindex].to_i < 32 ? (row[:teamindex].to_i + 1) : nil,
         name: [row[:firstname], row[:lastname]].compact.join(" "),
         first_name: row[:firstname],
         last_name: row[:lastname],
@@ -79,11 +81,11 @@ class Import::Players < ApplicationService
         overall_rating: row[:overallrating].to_i,
         draft_round: row[:plyr_draftround].to_i,
         draft_pick: row[:plyr_draftpick].to_i,
-        year_drafted: (current_season + row[:yeardrafted].to_i),
+        year_drafted: (2019 + row[:yeardrafted].to_i),
         contract_length: row[:contractlength].to_i,
         contract_year: (row[:contractyear].to_i + 1),
         contract_years_left: (row[:contractlength].to_i - row[:contractyear].to_i),
-        cap_hit: (row[:plyr_capsalary].to_i * 10_000),
+        cap_hit: cap_hit,
         cap_savings: cap_savings,
         cap_penalty: cap_penalty,
         is_injured_reserve: (row[:isinjuredreserve] == "TRUE"),

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200402232757) do
+ActiveRecord::Schema.define(version: 20200404184049) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,14 @@ ActiveRecord::Schema.define(version: 20200402232757) do
     t.integer "contract_year"
     t.money "salary", scale: 2
     t.money "bonus", scale: 2
+  end
+
+  create_table "grades", id: :bigint, default: nil, force: :cascade do |t|
+    t.bigint "prospect_id"
+    t.string "archetype"
+    t.string "letter"
+    t.integer "rating"
+    t.integer "value"
   end
 
   create_table "players", id: :bigint, default: nil, force: :cascade do |t|
@@ -50,8 +58,25 @@ ActiveRecord::Schema.define(version: 20200402232757) do
     t.boolean "is_injured_reserve"
   end
 
+  create_table "prospects", id: :bigint, default: nil, force: :cascade do |t|
+    t.string "name"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "position"
+    t.string "role"
+    t.string "grade"
+    t.integer "age"
+    t.integer "height"
+    t.integer "weight"
+    t.integer "round"
+    t.integer "pick"
+    t.decimal "value"
+  end
+
   create_table "teams", id: :bigint, default: nil, force: :cascade do |t|
     t.string "name"
+    t.string "conference"
+    t.string "division"
     t.integer "ovrerall_rating"
     t.integer "offense_rating"
     t.integer "defense_rating"

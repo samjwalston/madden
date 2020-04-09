@@ -3,6 +3,8 @@ class CreateTeams < ActiveRecord::Migration[5.1]
     create_table :teams, id: false do |t|
       t.bigint :id, primary_key: true
       t.string :name
+      t.string :conference
+      t.string :division
       t.integer :ovrerall_rating
       t.integer :offense_rating
       t.integer :defense_rating
