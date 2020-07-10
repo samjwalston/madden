@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200404184049) do
+ActiveRecord::Schema.define(version: 20200710145541) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -19,6 +19,12 @@ ActiveRecord::Schema.define(version: 20200404184049) do
     t.bigint "player_id"
     t.string "name"
     t.integer "overall_rating"
+  end
+
+  create_table "categories", id: :bigint, default: nil, force: :cascade do |t|
+    t.bigint "player_id"
+    t.string "name"
+    t.integer "rating"
   end
 
   create_table "contracts", id: :bigint, default: nil, force: :cascade do |t|
@@ -33,43 +39,45 @@ ActiveRecord::Schema.define(version: 20200404184049) do
     t.string "archetype"
     t.string "letter"
     t.integer "rating"
-    t.integer "value"
   end
 
   create_table "players", id: :bigint, default: nil, force: :cascade do |t|
     t.bigint "team_id"
     t.string "name"
-    t.string "first_name"
-    t.string "last_name"
     t.string "position"
     t.string "development_trait"
-    t.string "injury_status"
+    t.string "status"
     t.integer "age"
     t.integer "overall_rating"
     t.integer "draft_round"
     t.integer "draft_pick"
     t.integer "year_drafted"
+    t.integer "years_pro"
     t.integer "contract_length"
     t.integer "contract_year"
     t.integer "contract_years_left"
     t.money "cap_hit", scale: 2
     t.money "cap_savings", scale: 2
     t.money "cap_penalty", scale: 2
-    t.boolean "is_injured_reserve"
   end
 
   create_table "prospects", id: :bigint, default: nil, force: :cascade do |t|
     t.string "name"
-    t.string "first_name"
-    t.string "last_name"
     t.string "position"
     t.string "role"
+    t.string "style"
     t.string "grade"
     t.integer "age"
-    t.integer "height"
-    t.integer "weight"
-    t.integer "round"
-    t.integer "pick"
+    t.integer "draft_round"
+    t.integer "draft_pick"
+    t.decimal "value"
+  end
+
+  create_table "roles", id: :bigint, default: nil, force: :cascade do |t|
+    t.bigint "player_id"
+    t.string "name"
+    t.string "style"
+    t.integer "rating"
     t.decimal "value"
   end
 
@@ -77,18 +85,17 @@ ActiveRecord::Schema.define(version: 20200404184049) do
     t.string "name"
     t.string "conference"
     t.string "division"
-    t.integer "ovrerall_rating"
+    t.integer "overall_rating"
     t.integer "offense_rating"
     t.integer "defense_rating"
     t.integer "specialteams_rating"
-    t.integer "quaterback_rating"
-    t.integer "runningback_rating"
-    t.integer "widereceiver_rating"
-    t.integer "tightend_rating"
-    t.integer "offensiveline_rating"
-    t.integer "defensiveline_rating"
-    t.integer "linebacker_rating"
-    t.integer "defensiveback_rating"
+    t.integer "quarterback_rating"
+    t.integer "rushing_rating"
+    t.integer "receiver_rating"
+    t.integer "passprotect_rating"
+    t.integer "passrush_rating"
+    t.integer "rundefense_rating"
+    t.integer "passcoverage_rating"
   end
 
 end

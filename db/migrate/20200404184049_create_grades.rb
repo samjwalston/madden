@@ -6,7 +6,6 @@ class CreateGrades < ActiveRecord::Migration[5.1]
       t.string :archetype
       t.string :letter
       t.integer :rating
-      t.integer :value
     end
   end
 end

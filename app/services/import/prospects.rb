@@ -22,7 +22,6 @@ class Import::Prospects < ApplicationService
 
     letter_grades = get_letter_grades
     archetype_names = get_archetype_names
-    role_values = get_role_values
 
     prospect_id = 0
     grade_id = 0
@@ -42,10 +41,6 @@ class Import::Prospects < ApplicationService
         }
       end
 
-      role = get_role(row[:position], archetypes)
-      rating = (archetypes.map{|a| a[:rating]}.sum.to_d / archetypes.size)
-      prospect_value = get_prospect_value(role, archetypes, rating)
-
       archetypes.each do |archetype|
         grade_id += 1
 
@@ -55,24 +50,22 @@ class Import::Prospects < ApplicationService
           archetype: archetype[:name],
           letter: archetype[:grade],
           rating: archetype[:rating],
-          value: role_values[role].index(archetype[:name]),
         }
       end
+
+      role = get_role(row[:position], row[:weight], archetypes)
 
       prospects << {
         id: prospect_id,
         name: [row[:first_name], row[:last_name]].compact.join(" "),
-        first_name: row[:first_name],
-        last_name: row[:last_name],
-        position: row[:position],
-        role: role,
-        grade: letter_grades[rating.round],
         age: row[:age].to_i,
-        height: row[:height_data].to_i,
-        weight: row[:weight].to_i,
-        round: row[:projected_draft_rd_data].to_i > 7 ? nil : row[:projected_draft_rd_data].to_i,
-        pick: row[:projected_draft_rd_data].to_i > 7 ? nil : row[:projected_draft_pk_data].to_i,
-        value: prospect_value
+        position: row[:position],
+        role: role[:name],
+        style: role[:style],
+        value: role[:value],
+        grade: letter_grades[role[:rating].to_i],
+        draft_round: row[:projected_draft_rd_data].to_i > 7 ? nil : row[:projected_draft_rd_data].to_i,
+        draft_pick: row[:projected_draft_rd_data].to_i > 7 ? nil : row[:projected_draft_pk_data].to_i
       }
     end
 
@@ -109,138 +102,384 @@ class Import::Prospects < ApplicationService
     }
   end
 
-  def get_role_values
+  def get_category_names
     {
-      "QB"=>["Scrambler", "Field General", "Improviser", "Strong Arm"],
-      "HB"=>["Elusive Back", "Receiving Back", "Power Back"],
-      "FB"=>["Blocking", "Utility"],
-      "WR"=>["Physical", "Slot", "Deep Threat", "Route Runner"],
-      "TE"=>["Blocking", "Possession", "Vertical Threat"],
-      "OT"=>["Agile", "Power", "Pass Protector"],
-      "IOL"=>["Agile", "Pass Protector", "Power"],
-      "EDP"=>["Pass Coverage", "Run Stopper", "Speed Rusher", "Power Rusher"],
-      "EDS"=>["Pass Coverage", "Run Stopper", "Power Rusher", "Speed Rusher"],
-      "IDL"=>["Speed Rusher", "Run Stopper", "Power Rusher"],
-      "OLB"=>["Power Rusher", "Speed Rusher", "Run Stopper", "Pass Coverage"],
-      "ILB"=>["Run Stopper", "Pass Coverage", "Field General"],
-      "CB"=>["Slot", "Zone", "Man to Man"],
-      "FS"=>["Run Support", "Hybrid", "Zone"],
-      "SS"=>["Zone", "Run Support", "Hybrid"],
-      "K"=>["Power", "Accurate"],
-      "P"=>["Power", "Accurate"],
+      "QB"=>["Passer"],
+      "HB"=>["Runner", "Receiver"],
+      "FB"=>["Blocker"],
+      "WR"=>["Outside Receiver", "Slot Receiver"],
+      "TE"=>["Receiver", "Blocker"],
+      "LT"=>["Pass Blocker", "Run Blocker"],
+      "LG"=>["Pass Blocker", "Run Blocker"],
+      "C"=>["Pass Blocker", "Run Blocker"],
+      "RG"=>["Pass Blocker", "Run Blocker"],
+      "RT"=>["Pass Blocker", "Run Blocker"],
+      "LE"=>["Edge Rusher", "Interior Rusher", "Run Stopper"],
+      "RE"=>["Edge Rusher", "Interior Rusher", "Run Stopper"],
+      "DT"=>["Edge Rusher", "Interior Rusher", "Run Stopper"],
+      "LOLB"=>["Edge Rusher", "Pass Coverage", "Run Stopper"],
+      "MLB"=>["Pass Coverage", "Run Stopper"],
+      "ROLB"=>["Edge Rusher", "Pass Coverage", "Run Stopper"],
+      "CB"=>["Outside Coverage", "Slot Coverage"],
+      "FS"=>["Pass Coverage", "Run Stopper"],
+      "SS"=>["Pass Coverage", "Run Stopper"],
+      "K"=>["Kicker"],
+      "P"=>["Kicker"],
     }
   end
 
-  def get_role(position, archetypes)
-    if position.in?(["LT","LG","C","RG","RT"])
-      pass_protector = archetypes.detect{|a| a[:name] == "Pass Protector"}
-      power = archetypes.detect{|a| a[:name] == "Power"}
+  def get_role_names
+    {
+      "LT"=>["OT", "IOL"],
+      "LG"=>["OT", "IOL"],
+      "C"=>["OT", "IOL"],
+      "RG"=>["OT", "IOL"],
+      "RT"=>["OT", "IOL"],
+      "LE"=>["EDGE", "IDL"],
+      "RE"=>["EDGE", "IDL"],
+      "DT"=>["EDGE", "IDL"],
+      "LOLB"=>["EDGE", "LB"],
+      "MLB"=>["LB"],
+      "ROLB"=>["EDGE", "LB"],
+      "FS"=>["S"],
+      "SS"=>["S"],
+    }
+  end
 
-      pass_protector[:rating] >= power[:rating] ? "OT" : "IOL"
-    elsif position.in?(["LE","RE","DT"])
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      speed = archetypes.detect{|a| a[:name] == "Speed Rusher"}
-      power = archetypes.detect{|a| a[:name] == "Power Rusher"}
+  def get_role(position, weight, archetypes)
+    categories = get_categories(position, weight, archetypes)
+    roles = get_roles(position, categories, archetypes)
 
-      if speed[:rating] == max_archetype[:rating]
-        "EDS"
-      elsif power[:rating] == max_archetype[:rating] && (power[:rating] + speed[:rating]) >= ((power[:rating] * 2) - 1)
-        "EDP"
-      else
-        "IDL"
-      end
-    elsif position.in?(["LOLB","ROLB"])
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      speed = archetypes.detect{|a| a[:name] == "Speed Rusher"}
-      power = archetypes.detect{|a| a[:name] == "Power Rusher"}
+    if position.in?(["LOLB","ROLB"])
+      edge = roles.detect{|a| a[:name] == "EDGE"}
+      linebacker = roles.detect{|a| a[:name] == "LB"}
 
-      if speed[:rating] == max_archetype[:rating]
-        "EDS"
-      elsif power[:rating] == max_archetype[:rating]
-        "EDP"
-      else
-        "OLB"
-      end
-    elsif position == "MLB"
-      field_general = archetypes.detect{|a| a[:name] == "Field General"}
-      pass_coverage = archetypes.detect{|a| a[:name] == "Pass Coverage"}
-
-      pass_coverage[:rating] > field_general[:rating] ? "OLB" : "ILB"
-    elsif position.in?(["FS","SS"])
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      zone = archetypes.detect{|a| a[:name] == "Zone"}
-
-      zone[:rating] == max_archetype[:rating] ? "FS" : "SS"
+      edge[:rating] >= linebacker[:rating] ? edge : linebacker
     else
-      position
+      roles.first
     end
   end
 
-  def get_prospect_value(role, archetypes, rating)
-    if role == "QB"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      strong_arm = archetypes.detect{|a| a[:name] == "Strong Arm"}
+  def get_categories(position, weight, archetypes)
+    position_categories = get_category_names
+    category_names = position_categories[position]
+    categories = []
 
-      strong_arm[:rating] == max_archetype[:rating] ? (rating + 1.5.to_d).round(2) : (rating + 1.25.to_d).round(2)
-    elsif role == "HB"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      power_back = archetypes.detect{|a| a[:name] == "Power Back"}
-
-      power_back[:rating] == max_archetype[:rating] ? (rating - 0.25.to_d).round(2) : (rating - 0.5.to_d).round(2)
-    elsif role == "WR"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      route_runner = archetypes.detect{|a| a[:name] == "Route Runner"}
-      deep_threat = archetypes.detect{|a| a[:name] == "Deep Threat"}
-
-      if deep_threat[:rating] == max_archetype[:rating] || route_runner[:rating] == max_archetype[:rating]
-        (rating + 0.5.to_d).round(2)
+    category_names.each do |category_name|
+      rating = if position == "QB"
+        [
+          archetypes.detect{|a| a[:name] == "Field General"}.to_h[:rating].to_d * 0.3.to_d,
+          archetypes.detect{|a| a[:name] == "Strong Arm"}.to_h[:rating].to_d * 0.25.to_d,
+          archetypes.detect{|a| a[:name] == "Improviser"}.to_h[:rating].to_d * 0.25.to_d,
+          archetypes.detect{|a| a[:name] == "Scrambler"}.to_h[:rating].to_d * 0.2.to_d
+        ].sum
+      elsif position == "HB"
+        if category_name == "Runner"
+          [
+            archetypes.detect{|a| a[:name] == "Elusive Back"}.to_h[:rating].to_d,
+            archetypes.detect{|a| a[:name] == "Power Back"}.to_h[:rating].to_d
+          ].max
+        else
+          archetypes.detect{|a| a[:name] == "Receiving Back"}.to_h[:rating].to_d
+        end
+      elsif position == "FB"
+        [
+          archetypes.detect{|a| a[:name] == "Blocking"}.to_h[:rating].to_d * 0.75.to_d,
+          archetypes.detect{|a| a[:name] == "Utility"}.to_h[:rating].to_d * 0.25.to_d
+        ].sum
+      elsif position == "WR"
+        if category_name == "Outside Receiver"
+          [
+            archetypes.detect{|a| a[:name] == "Route Runner"}.to_h[:rating].to_d * 0.75.to_d,
+            archetypes.detect{|a| a[:name] == "Deep Threat"}.to_h[:rating].to_d * 0.25.to_d
+          ].sum
+        else
+          [
+            archetypes.detect{|a| a[:name] == "Slot"}.to_h[:rating].to_d * 0.75.to_d,
+            archetypes.detect{|a| a[:name] == "Physical"}.to_h[:rating].to_d * 0.25.to_d
+          ].sum
+        end
+      elsif position == "TE"
+        if category_name == "Receiver"
+          [
+            archetypes.detect{|a| a[:name] == "Possession"}.to_h[:rating].to_d * 0.5.to_d,
+            archetypes.detect{|a| a[:name] == "Vertical Threat"}.to_h[:rating].to_d * 0.5.to_d
+          ].sum
+        else
+          archetypes.detect{|a| a[:name] == "Blocking"}.to_h[:rating].to_d
+        end
+      elsif position.in?(["LT", "LG", "C", "RG", "RT"])
+        if category_name == "Run Blocker"
+          [
+            archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d,
+            archetypes.detect{|a| a[:name] == "Agile"}.to_h[:rating].to_d
+          ].max
+        else
+          archetypes.detect{|a| a[:name] == "Pass Protector"}.to_h[:rating].to_d
+        end
+      elsif position.in?(["LE", "RE", "DT"])
+        if category_name == "Edge Rusher"
+          if weight.to_i < 280
+            [
+              archetypes.detect{|a| a[:name] == "Power Rusher"}.to_h[:rating].to_d * 0.5.to_d,
+              archetypes.detect{|a| a[:name] == "Speed Rusher"}.to_h[:rating].to_d * 0.5.to_d
+            ].sum
+          else
+            0
+          end
+        elsif category_name == "Interior Rusher"
+          if weight.to_i >= 280
+            [
+              archetypes.detect{|a| a[:name] == "Power Rusher"}.to_h[:rating].to_d * 0.75.to_d,
+              archetypes.detect{|a| a[:name] == "Speed Rusher"}.to_h[:rating].to_d * 0.25.to_d
+            ].sum
+          else
+            0
+          end
+        else
+          archetypes.detect{|a| a[:name] == "Run Stopper"}.to_h[:rating].to_d
+        end
+      elsif position.in?(["LOLB", "ROLB"])
+        if category_name == "Edge Rusher"
+          [
+            archetypes.detect{|a| a[:name] == "Power Rusher"}.to_h[:rating].to_d * 0.5.to_d,
+            archetypes.detect{|a| a[:name] == "Speed Rusher"}.to_h[:rating].to_d * 0.5.to_d
+          ].sum
+        elsif category_name == "Pass Coverage"
+          archetypes.detect{|a| a[:name] == "Pass Coverage"}.to_h[:rating].to_d
+        else
+          archetypes.detect{|a| a[:name] == "Run Stopper"}.to_h[:rating].to_d
+        end
+      elsif position == "MLB"
+        if category_name == "Pass Coverage"
+          [
+            archetypes.detect{|a| a[:name] == "Pass Coverage"}.to_h[:rating].to_d * 0.75.to_d,
+            archetypes.detect{|a| a[:name] == "Field General"}.to_h[:rating].to_d * 0.25.to_d
+          ].sum
+        else
+          [
+            archetypes.detect{|a| a[:name] == "Run Stopper"}.to_h[:rating].to_d * 0.75.to_d,
+            archetypes.detect{|a| a[:name] == "Field General"}.to_h[:rating].to_d * 0.25.to_d
+          ].sum
+        end
+      elsif position == "CB"
+        if category_name == "Outside Coverage"
+          [
+            archetypes.detect{|a| a[:name] == "Man to Man"}.to_h[:rating].to_d * 0.5.to_d,
+            archetypes.detect{|a| a[:name] == "Zone"}.to_h[:rating].to_d * 0.5.to_d
+          ].sum
+        else
+          [
+            archetypes.detect{|a| a[:name] == "Slot"}.to_h[:rating].to_d * 0.6.to_d,
+            archetypes.detect{|a| a[:name] == "Man to Man"}.to_h[:rating].to_d * 0.2.to_d,
+            archetypes.detect{|a| a[:name] == "Zone"}.to_h[:rating].to_d * 0.2.to_d
+          ].sum
+        end
+      elsif position.in?(["FS", "SS"])
+        if category_name == "Pass Coverage"
+          [
+            archetypes.detect{|a| a[:name] == "Zone"}.to_h[:rating].to_d * 0.5.to_d,
+            archetypes.detect{|a| a[:name] == "Hybrid"}.to_h[:rating].to_d * 0.5.to_d
+          ].sum
+        else
+          [
+            archetypes.detect{|a| a[:name] == "Run Support"}.to_h[:rating].to_d * 0.5.to_d,
+            archetypes.detect{|a| a[:name] == "Hybrid"}.to_h[:rating].to_d * 0.5.to_d
+          ].sum
+        end
+      elsif position == "K"
+        [
+          archetypes.detect{|a| a[:name] == "Accurate"}.to_h[:rating].to_d * 0.75.to_d,
+          archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d * 0.25.to_d
+        ].sum
+      elsif position == "P"
+        [
+          archetypes.detect{|a| a[:name] == "Accurate"}.to_h[:rating].to_d * 0.5.to_d,
+          archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d * 0.5.to_d
+        ].sum
       else
-        (rating + 0.25.to_d).round(2)
+        0
       end
-    elsif role == "TE"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      blocking = archetypes.detect{|a| a[:name] == "Blocking"}
 
-      blocking[:rating] == max_archetype[:rating] ? (rating - 0.5.to_d).round(2) : (rating - 0.25.to_d).round(2)
-    elsif role == "OT"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      pass_protector = archetypes.detect{|a| a[:name] == "Pass Protector"}
-
-      pass_protector[:rating] == max_archetype[:rating] ? (rating + 0.25.to_d).round(2) : rating.round(2)
-    elsif role == "IOL"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      power = archetypes.detect{|a| a[:name] == "Power"}
-
-      power[:rating] == max_archetype[:rating] ? (rating - 0.25.to_d).round(2) : (rating - 0.5.to_d).round(2)
-    elsif role.in?(["EDP","EDS"])
-      (rating + 0.25.to_d).round(2)
-    elsif role == "IDL"
-      run_stopper = archetypes.detect{|a| a[:name] == "Run Stopper"}
-      power_rusher = archetypes.detect{|a| a[:name] == "Power Rusher"}
-
-      if run_stopper[:rating] > (power_rusher[:rating] + 1)
-        (rating - 0.5.to_d).round(2)
-      elsif run_stopper[:rating] > power_rusher[:rating]
-        (rating - 0.25.to_d).round(2)
-      else
-        rating.round(2)
-      end
-    elsif role == "OLB"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      pass_coverage = archetypes.detect{|a| a[:name] == "Pass Coverage"}
-
-      pass_coverage[:rating] == max_archetype[:rating] ? rating.round(2) : (rating - 0.25.to_d).round(2)
-    elsif role == "ILB"
-      max_archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
-      field_general = archetypes.detect{|a| a[:name] == "Field General"}
-
-      field_general[:rating] == max_archetype[:rating] ? (rating + 0.25.to_d).round(2) : rating.round(2)
-    elsif role == "CB"
-      (rating + 0.5.to_d).round(2)
-    elsif role.in?(["FS","SS"])
-      rating.round(2)
-    else
-      (rating - 2.to_d).round(2)
+      categories << {name: category_name, rating: rating.to_i}
     end
+
+    categories
+  end
+
+  def get_roles(position, categories, archetypes)
+    position_roles = get_role_names
+    role_names = (position_roles[position] || [position])
+    roles = []
+
+    role_names.each do |role_name|
+      rating = 0
+      value = 0.to_d
+      style_name = ""
+
+      if role_name == "QB"
+        category = categories.first
+        pocket_rating = [
+          archetypes.detect{|a| a[:name] == "Field General"}.to_h[:rating].to_d,
+          archetypes.detect{|a| a[:name] == "Strong Arm"}.to_h[:rating].to_d
+        ].sum
+        mobile_rating = [
+          archetypes.detect{|a| a[:name] == "Improviser"}.to_h[:rating].to_d,
+          archetypes.detect{|a| a[:name] == "Scrambler"}.to_h[:rating].to_d
+        ].sum
+
+        rating = category[:rating]
+        value = (category[:rating].to_d * 1.0.to_d).round(2)
+        style_name = (pocket_rating >= mobile_rating ? "Pocket" : "Mobile")
+      elsif role_name == "HB"
+        archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
+
+        rating = archetype[:rating]
+        value = (archetype[:rating].to_d * 0.775.to_d).round(2)
+        style_name = (archetype[:name].split(" ").first)
+      elsif role_name == "FB"
+        category = categories.first
+        archetype = archetypes.sort{|a,b| b[:rating] <=> a[:rating]}.first
+
+        rating = category[:rating]
+        value = (category[:rating].to_d * 0.582.to_d).round(2)
+        style_name = archetype[:name]
+      elsif role_name == "WR"
+        outside = categories.detect{|a| a[:name] == "Outside Receiver"}.to_h[:rating].to_d
+        slot = categories.detect{|a| a[:name] == "Slot Receiver"}.to_h[:rating].to_d
+
+        if outside >= slot
+          rating = outside
+          value = (outside.to_d * 0.834.to_d).round(2)
+          style_name = "Outside"
+        else
+          rating = slot
+          value = (slot.to_d * 0.781.to_d).round(2)
+          style_name = "Slot"
+        end
+      elsif role_name == "TE"
+        receiver = categories.detect{|a| a[:name] == "Receiver"}.to_h[:rating].to_d
+        blocker = categories.detect{|a| a[:name] == "Blocker"}.to_h[:rating].to_d
+
+        if receiver >= blocker
+          rating = receiver
+          value = (receiver.to_d * 0.777.to_d).round(2)
+          style_name = "Receiver"
+        else
+          rating = blocker
+          value = (blocker.to_d * 0.686.to_d).round(2)
+          style_name = "Blocking"
+        end
+      elsif role_name == "OT"
+        pass = categories.detect{|a| a[:name] == "Pass Blocker"}.to_h[:rating].to_d
+        run = categories.detect{|a| a[:name] == "Run Blocker"}.to_h[:rating].to_d
+
+        if pass >= run
+          rating = pass
+          value = (pass.to_d * 0.776.to_d).round(2)
+          style_name = "Pass Protector"
+        end
+      elsif role_name == "IOL"
+        pass = categories.detect{|a| a[:name] == "Pass Blocker"}.to_h[:rating].to_d
+        run = categories.detect{|a| a[:name] == "Run Blocker"}.to_h[:rating].to_d
+
+        if run >= pass
+          power = archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d
+          agile = archetypes.detect{|a| a[:name] == "Agile"}.to_h[:rating].to_d
+
+          rating = run
+          value = (run.to_d * 0.694.to_d).round(2)
+          style_name = (power >= agile ? "Power" : "Agile")
+        end
+      elsif role_name == "EDGE"
+        category = categories.detect{|a| a[:name] == "Edge Rusher"}
+
+        unless category[:rating].zero?
+          power = archetypes.detect{|a| a[:name] == "Power Rusher"}.to_h[:rating].to_d
+          speed = archetypes.detect{|a| a[:name] == "Speed Rusher"}.to_h[:rating].to_d
+
+          rating = category[:rating]
+          value = (category[:rating].to_d * 0.81.to_d).round(2) # On this value
+          style_name = (power >= speed ? "Power" : "Speed")
+        end
+      elsif role_name == "IDL"
+        rusher = categories.detect{|a| a[:name] == "Interior Rusher"}.to_h[:rating].to_d
+
+        unless rusher.zero?
+          run = categories.detect{|a| a[:name] == "Run Stopper"}.to_h[:rating].to_d
+
+          if rusher > run
+            rating = rusher
+            value = (rusher.to_d * 0.75.to_d).round(2)
+            style_name = "Pass Rusher"
+          else
+            rating = run
+            value = (run.to_d * 0.713.to_d).round(2)
+            style_name = "Run Stopper"
+          end
+        end
+      elsif role_name == "LB"
+        run = categories.detect{|a| a[:name] == "Run Stopper"}.to_h[:rating].to_d
+        pass = categories.detect{|a| a[:name] == "Pass Coverage"}.to_h[:rating].to_d
+        score = ([run, pass].sum / 2.to_d).floor.to_i
+
+        rating = score
+        value = (score.to_d * 0.73.to_d).round(2)
+        style_name = (pass > run ? "Outside" : "Inside")
+      elsif role_name == "CB"
+        outside = categories.detect{|a| a[:name] == "Outside Coverage"}.to_h[:rating].to_d
+        slot = categories.detect{|a| a[:name] == "Slot Coverage"}.to_h[:rating].to_d
+
+        if outside >= slot
+          rating = outside
+          value = (outside.to_d * 0.821.to_d).round(2)
+          style_name = "Outside"
+        else
+          rating = slot
+          value = (slot.to_d * 0.821.to_d).round(2)
+          style_name = "Slot"
+        end
+      elsif role_name == "S"
+        pass = categories.detect{|a| a[:name] == "Pass Coverage"}.to_h[:rating].to_d
+        run = categories.detect{|a| a[:name] == "Run Stopper"}.to_h[:rating].to_d
+
+        if pass >= run
+          rating = pass
+          value = (pass.to_d * 0.783.to_d).round(2)
+          style_name = "Free"
+        else
+          rating = run
+          value = (run.to_d * 0.75.to_d).round(2)
+          style_name = "Strong"
+        end
+      elsif role_name == "K"
+        category = categories.first
+        accurate = archetypes.detect{|a| a[:name] == "Accurate"}.to_h[:rating].to_d
+        power = archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d
+
+        rating = category[:rating]
+        value = (category[:rating].to_d * 0.558.to_d).round(2)
+        style_name = (accurate >= power ? "Accurate" : "Power")
+      elsif role_name == "P"
+        category = categories.first
+        accurate = archetypes.detect{|a| a[:name] == "Accurate"}.to_h[:rating].to_d
+        power = archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d
+
+        rating = category[:rating]
+        value = (category[:rating].to_d * 0.447.to_d).round(2)
+        style_name = (accurate >= power ? "Accurate" : "Power")
+      end
+
+      unless rating.zero?
+        roles << {
+          name: role_name,
+          style: style_name,
+          rating: rating,
+          value: value
+        }
+      end
+    end
+
+    roles
   end
 end
