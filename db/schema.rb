@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200710145541) do
+ActiveRecord::Schema.define(version: 20200819150934) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,10 +21,13 @@ ActiveRecord::Schema.define(version: 20200710145541) do
     t.integer "overall_rating"
   end
 
-  create_table "categories", id: :bigint, default: nil, force: :cascade do |t|
-    t.bigint "player_id"
+  create_table "coaches", id: :bigint, default: nil, force: :cascade do |t|
+    t.bigint "team_id"
     t.string "name"
-    t.integer "rating"
+    t.decimal "overall_rating"
+    t.decimal "offense_rating"
+    t.decimal "defense_rating"
+    t.decimal "specialteams_rating"
   end
 
   create_table "contracts", id: :bigint, default: nil, force: :cascade do |t|
@@ -67,6 +70,7 @@ ActiveRecord::Schema.define(version: 20200710145541) do
     t.string "role"
     t.string "style"
     t.string "grade"
+    t.string "development_trait"
     t.integer "age"
     t.integer "draft_round"
     t.integer "draft_pick"
@@ -85,17 +89,17 @@ ActiveRecord::Schema.define(version: 20200710145541) do
     t.string "name"
     t.string "conference"
     t.string "division"
-    t.integer "overall_rating"
-    t.integer "offense_rating"
-    t.integer "defense_rating"
-    t.integer "specialteams_rating"
-    t.integer "quarterback_rating"
-    t.integer "rushing_rating"
-    t.integer "receiver_rating"
-    t.integer "passprotect_rating"
-    t.integer "passrush_rating"
-    t.integer "rundefense_rating"
-    t.integer "passcoverage_rating"
+    t.decimal "overall_rating"
+    t.decimal "offense_rating"
+    t.decimal "defense_rating"
+    t.decimal "specialteams_rating"
+    t.decimal "quarterback_rating"
+    t.decimal "rushing_rating"
+    t.decimal "receiver_rating"
+    t.decimal "passprotect_rating"
+    t.decimal "passrush_rating"
+    t.decimal "rundefense_rating"
+    t.decimal "passcoverage_rating"
   end
 
 end

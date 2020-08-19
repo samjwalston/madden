@@ -18,34 +18,27 @@ class Import::Teams < ApplicationService
     CSV.foreach(Rails.root.join("teams.csv"), {headers: true, header_converters: :symbol}) do |row|
       next if row[:teamindex].to_i >= 32
 
+
       team_id = (row[:teamindex].to_i + 1)
       quarterback_rating = get_quarterback_rating(team_id)
       rushing_rating = get_rushing_rating(team_id)
-      receiver_rating = get_receiver_rating(team_id)
+      receiving_rating = get_receiving_rating(team_id)
       passprotect_rating = get_passprotect_rating(team_id)
       passrush_rating = get_passrush_rating(team_id)
       rundefense_rating = get_rundefense_rating(team_id)
       passcoverage_rating = get_passcoverage_rating(team_id)
-      specialteams_rating = get_specialteams_rating(team_id)
 
-      offense_rating = [
-        quarterback_rating.to_d * 0.36.to_d,
-        rushing_rating.to_d * 0.12.to_d,
-        receiver_rating.to_d * 0.34.to_d,
-        passprotect_rating.to_d * 0.18.to_d
-      ].sum.floor.to_i
-
-      defense_rating = [
-        passrush_rating.to_d * 0.3.to_d,
-        rundefense_rating.to_d * 0.1.to_d,
-        passcoverage_rating.to_d * 0.6.to_d
-      ].sum.floor.to_i
+      culture_rating = get_culture_rating(row)
+      offense_rating = get_offense_rating(team_id, culture_rating, quarterback_rating, rushing_rating, receiving_rating, passprotect_rating)
+      defense_rating = get_defense_rating(team_id, culture_rating, passrush_rating, rundefense_rating, passcoverage_rating)
+      specialteams_rating = get_specialteams_rating(team_id, culture_rating)
 
       overall_rating = [
-        offense_rating.to_d * 0.56.to_d,
-        defense_rating.to_d * 0.43.to_d,
+        offense_rating.to_d * 0.6.to_d,
+        defense_rating.to_d * 0.39.to_d,
         specialteams_rating.to_d * 0.01.to_d,
-      ].sum.floor.to_i
+      ].sum.round(2)
+
 
       records << {
         id: team_id,
@@ -58,7 +51,7 @@ class Import::Teams < ApplicationService
         specialteams_rating: specialteams_rating,
         quarterback_rating: quarterback_rating,
         rushing_rating: rushing_rating,
-        receiver_rating: receiver_rating,
+        receiver_rating: receiving_rating,
         passprotect_rating: passprotect_rating,
         passrush_rating: passrush_rating,
         rundefense_rating: rundefense_rating,
@@ -68,7 +61,6 @@ class Import::Teams < ApplicationService
 
     records
   end
-
 
   def get_team_info
     {
@@ -108,237 +100,529 @@ class Import::Teams < ApplicationService
   end
 
   def get_quarterback_rating(team_id)
-    quarterbacks = Player.includes(:categories).where(team_id: team_id, position: "QB")
+    quarterback_depth = Player.includes(:role).where(team_id: team_id, position: "QB")
+    quarterback = quarterback_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}.first
 
-    rating = quarterbacks.map do |player|
-      player.categories.to_a.detect{|p| p.name == "Passer"}.rating.to_d
-    end.max
-
-    rating.to_d.floor.to_i
+    if quarterback.role.style == "Balanced"
+      (quarterback.role.rating.to_d * 1.1.to_d).round(2)
+    else
+      quarterback.role.rating.to_d
+    end
   end
 
   def get_rushing_rating(team_id)
-    runningbacks = Player.includes(:categories).where(team_id: team_id, position: "HB")
-    blockers = Player.includes(:categories).where(team_id: team_id, position: ["TE", "FB"])
-    left_tackle = Player.includes(:categories).where(team_id: team_id, position: "LT").order(overall_rating: :desc).first
-    left_guard = Player.includes(:categories).where(team_id: team_id, position: "LG").order(overall_rating: :desc).first
-    center = Player.includes(:categories).where(team_id: team_id, position: "C").order(overall_rating: :desc).first
-    right_guard = Player.includes(:categories).where(team_id: team_id, position: "RG").order(overall_rating: :desc).first
-    right_tackle = Player.includes(:categories).where(team_id: team_id, position: "RT").order(overall_rating: :desc).first
+    runningback_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: "HB")
+    interior_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"])
+    tackle_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"])
+    blocker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE", "FB"])
+    styles = []
 
-    runningback_rating = runningbacks.map do |runningback|
-      runningback.categories.to_a.detect{|p| p.name == "Runner"}.rating.to_d
-    end.max
 
-    blocker_rating = blockers.map do |blocker|
-      blocker.categories.to_a.detect{|p| p.name == "Blocker"}.rating.to_d
-    end.max
+    # HB Rushing Rating Calculations
+    runningback_player = runningback_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.find_all{|a| a.name.in?(["Power Back", "Elusive Back"])}.sort{|a, b| b.overall_rating <=> a.overall_rating}.first.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}.first
 
-    tackle_rating = ([
-      left_tackle.categories.to_a.detect{|p| p.name == "Run Blocker"}.rating.to_d,
-      right_tackle.categories.to_a.detect{|p| p.name == "Run Blocker"}.rating.to_d
-    ].sum / 3.to_d)
+    runningback = runningback_depth.detect{|p| p.id == runningback_player[:id]}
 
-    interior_rating = ([
-      left_guard.categories.to_a.detect{|p| p.name == "Run Blocker"}.rating.to_d,
-      center.categories.to_a.detect{|p| p.name == "Run Blocker"}.rating.to_d,
-      right_guard.categories.to_a.detect{|p| p.name == "Run Blocker"}.rating.to_d
-    ].sum / 3.to_d)
-
-    [
-      runningback_rating * 0.4.to_d,
-      interior_rating * 0.35.to_d,
-      tackle_rating * 0.2.to_d,
-      blocker_rating * 0.05.to_d
-    ].sum.floor.to_i
-  end
-
-  def get_receiver_rating(team_id)
-    widereceivers = Player.includes(:categories).where(team_id: team_id, position: "WR")
-    tightends = Player.includes(:categories).where(team_id: team_id, position: "TE")
-    runningbacks = Player.includes(:categories).where(team_id: team_id, position: "HB")
-
-    receivers = widereceivers.sort do |a, b|
-      a_rating = a.categories.to_a.detect{|p| p.name == "Outside Receiver"}.rating.to_d
-      b_rating = b.categories.to_a.detect{|p| p.name == "Outside Receiver"}.rating.to_d
-
-      b_rating <=> a_rating
+    runningback_rating = if runningback.role.style == "Balanced"
+      (runningback_player[:rating].to_d * 1.05.to_d)
+    else
+      runningback_player[:rating].to_d
     end
 
-    outside_receivers = receivers[0..1]
-    slot_receivers = receivers[2..-1]
+    styles << (runningback.role.style == "Elusive" ? "Finesse" : runningback.role.style)
 
-    outside_rating = (outside_receivers.map do |receiver|
-      receiver.categories.to_a.detect{|p| p.name == "Outside Receiver"}.rating.to_d
-    end.max(2).sum / 2.to_d)
 
-    slot_rating = slot_receivers.map do |receiver|
-      receiver.categories.to_a.detect{|p| p.name == "Slot Receiver"}.rating.to_d
-    end.max
+    # IOL Rushing Rating Calculations
+    interior_players = interior_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.find_all{|a| a.name.in?(["Power", "Agile"])}.sort{|a, b| b.overall_rating <=> a.overall_rating}.first.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}[0..2]
 
-    tightend_rating = tightends.map do |tightend|
-      tightend.categories.to_a.detect{|p| p.name == "Receiver"}.rating.to_d
-    end.max
+    interior_rating = (interior_players.map do |interior_player|
+      interior = interior_depth.detect{|p| p.id == interior_player[:id]}
+      styles << interior.role.style
 
-    runningback_rating = runningbacks.map do |runningback|
-      runningback.categories.to_a.detect{|p| p.name == "Receiver"}.rating.to_d
-    end.max
+      if interior.role.style == "Balanced"
+        (interior_player[:rating].to_d * 1.01.to_d)
+      else
+        interior_player[:rating].to_d
+      end
+    end.sum / 3.to_d)
 
-    [
-      outside_rating * 0.6.to_d,
-      slot_rating * 0.2.to_d,
+
+    # OT Rushing Rating Calculations
+    tackle_players = tackle_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.find_all{|a| a.name.in?(["Power", "Agile"])}.sort{|a, b| b.overall_rating <=> a.overall_rating}.first.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
+
+    tackle_rating = (tackle_players.map do |tackle_player|
+      tackle = tackle_depth.detect{|p| p.id == tackle_player[:id]}
+      styles << tackle.role.style
+
+      if tackle.role.style == "Balanced"
+        (tackle_player[:rating].to_d * 1.01.to_d)
+      else
+        tackle_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # TE/FB Rushing Rating Calculations
+    blocker_player = blocker_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.detect{|a| a.name == "Blocking"}.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}.first
+
+    blocker = blocker_depth.detect{|p| p.id == blocker_player[:id]}
+
+    blocker_rating = if blocker.role.style == "Balanced"
+      (blocker_player[:rating].to_d * 1.01.to_d)
+    else
+      blocker_player[:rating].to_d
+    end
+
+
+    # Final Rushing Rating Calculations
+    rushing_rating = [
+      runningback_rating * 0.4.to_d,
+      interior_rating * 0.3.to_d,
+      tackle_rating * 0.2.to_d,
+      blocker_rating * 0.1.to_d
+    ].sum
+
+    if styles.uniq.size == 1
+      (rushing_rating * 1.05.to_d).round(2)
+    else
+      rushing_rating.round(2)
+    end
+  end
+
+  def get_receiving_rating(team_id)
+    widereceiver_depth = Player.includes(:role).where(team_id: team_id, position: "WR")
+    tightend_depth = Player.includes(:role).where(team_id: team_id, position: "TE")
+    runningback_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["HB", "FB"])
+    styles = []
+
+
+    # WR Receiving Rating Calculations
+    widereceivers = widereceiver_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}[0..2]
+
+    widereceiver_rating = (widereceivers.map do |player|
+      styles << player.role.style
+
+      if player.role.style == "Balanced"
+        (player.role.rating.to_d * 1.01.to_d)
+      else
+        player.role.rating.to_d
+      end
+    end.sum / 3.to_d)
+
+
+    # TE Receiving Rating Calculations
+    tightend_player = tightend_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.find_all{|a| a.name.in?(["Vertical Threat", "Possession"])}.sort{|a, b| b.overall_rating <=> a.overall_rating}.first.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}.first
+
+    tightend = tightend_depth.detect{|p| p.id == tightend_player[:id]}
+    possession = tightend.archetypes.detect{|a| a.name == "Possession"}.overall_rating.to_d
+    vertical = tightend.archetypes.detect{|a| a.name == "Vertical Threat"}.overall_rating.to_d
+    tightend_player[:rating] = [possession * 0.6.to_d, vertical * 0.4.to_d].sum
+
+    tightend_rating = if tightend.role.style == "Balanced"
+      (tightend_player[:rating].to_d * 1.1.to_d)
+    else
+      tightend_player[:rating].to_d
+    end
+
+
+    # HB/FB Receiving Rating Calculations
+    runningback_player = runningback_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.detect{|a| a.name.in?(["Receiving Back", "Utility"])}.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}.first
+
+    runningback = runningback_depth.detect{|p| p.id == runningback_player[:id]}
+
+    runningback_rating = if runningback.role.style == "Balanced"
+      (runningback_player[:rating].to_d * 1.01.to_d)
+    else
+      runningback_player[:rating].to_d
+    end
+
+
+    # Final Receiving Rating Calculations
+    receiving_rating = [
+      widereceiver_rating * 0.8.to_d,
       tightend_rating * 0.15.to_d,
       runningback_rating * 0.05.to_d
-    ].sum.floor.to_i
+    ].sum
+
+    if styles.uniq.size == 3
+      if styles.first == "Balanced" && styles.include?("Slot") && styles.include?("Deep Threat")
+        (receiving_rating * 1.1.to_d).round(2)
+      else
+        (receiving_rating * 1.05.to_d).round(2)
+      end
+    else
+      receiving_rating.round(2)
+    end
   end
 
   def get_passprotect_rating(team_id)
-    blockers = Player.includes(:categories).where(team_id: team_id, position: ["FB","TE"])
-    left_tackle = Player.includes(:categories).where(team_id: team_id, position: "LT").order(overall_rating: :desc).first
-    left_guard = Player.includes(:categories).where(team_id: team_id, position: "LG").order(overall_rating: :desc).first
-    center = Player.includes(:categories).where(team_id: team_id, position: "C").order(overall_rating: :desc).first
-    right_guard = Player.includes(:categories).where(team_id: team_id, position: "RG").order(overall_rating: :desc).first
-    right_tackle = Player.includes(:categories).where(team_id: team_id, position: "RT").order(overall_rating: :desc).first
+    tackle_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"])
+    interior_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"])
+    blocker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE", "FB"])
 
-    blocker_rating = blockers.map do |blocker|
-      blocker.categories.to_a.detect{|p| p.name == "Blocker"}.rating.to_d
-    end.max
 
-    tackle_rating = ([
-      left_tackle.categories.to_a.detect{|p| p.name == "Pass Blocker"}.rating.to_d,
-      right_tackle.categories.to_a.detect{|p| p.name == "Pass Blocker"}.rating.to_d,
-    ].sum / 2.to_d)
+    # OT Pass Protection Rating Calculations
+    tackle_players = tackle_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.detect{|a| a.name == "Pass Protector"}.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
 
-    interior_rating = ([
-      left_guard.categories.to_a.detect{|p| p.name == "Pass Blocker"}.rating.to_d,
-      center.categories.to_a.detect{|p| p.name == "Pass Blocker"}.rating.to_d,
-      right_guard.categories.to_a.detect{|p| p.name == "Pass Blocker"}.rating.to_d
-    ].sum / 3.to_d)
+    tackle_rating = (tackle_players.map do |tackle_player|
+      tackle = tackle_depth.detect{|p| p.id == tackle_player[:id]}
 
+      if tackle.role.style == "Balanced"
+        (tackle_player[:rating].to_d * 1.01.to_d)
+      else
+        tackle_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # IOL Pass Protection Rating Calculations
+    interior_players = interior_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.detect{|a| a.name == "Pass Protector"}.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}[0..2]
+
+    interior_rating = (interior_players.map do |interior_player|
+      interior = interior_depth.detect{|p| p.id == interior_player[:id]}
+
+      if interior.role.style == "Balanced"
+        (interior_player[:rating].to_d * 1.01.to_d)
+      else
+        interior_player[:rating].to_d
+      end
+    end.sum / 3.to_d)
+
+
+    # TE/FB Pass Protection Rating Calculations
+    blocker_player = blocker_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.detect{|a| a.name == "Blocking"}.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}.first
+
+    blocker = blocker_depth.detect{|p| p.id == blocker_player[:id]}
+
+    blocker_rating = if blocker.role.style == "Balanced"
+      (blocker_player[:rating].to_d * 1.01.to_d)
+    else
+      blocker_player[:rating].to_d
+    end
+
+
+    # Final Pass Protection Rating Calculations
     [
-      tackle_rating * 0.6.to_d,
-      interior_rating * 0.35.to_d,
+      tackle_rating * 0.55.to_d,
+      interior_rating * 0.4.to_d,
       blocker_rating * 0.05.to_d
-    ].sum.floor.to_i
+    ].sum.round(2)
   end
 
   def get_passrush_rating(team_id)
-    rushers = Player.includes(:categories).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"])
+    passrush_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"])
+    edge_styles = []
 
-    edge_rating = (rushers.map do |rusher|
-      rusher.categories.to_a.detect{|p| p.name == "Edge Rusher"}.rating.to_d
-    end.max(2).sum / 2.to_d)
 
-    interior_rating = (rushers.map do |rusher|
-      role = rusher.categories.to_a.detect{|p| p.name == "Interior Rusher"}
-      role.nil? ? 0.to_d : role.rating.to_d
-    end.max(2).sum / 2.to_d)
+    # EDGE Pass Rushing Rating Calculations
+    edge_players = passrush_depth.dup.map do |player|
+      player.role.name == "EDGE" ? {id: player.id, rating: player.role.rating} : nil
+    end.compact.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
 
-    [
-      edge_rating * 0.7.to_d,
-      interior_rating * 0.3.to_d
-    ].sum.floor.to_i
+    edge_rating = (edge_players.map do |edge_player|
+      edge = passrush_depth.detect{|p| p.id == edge_player[:id]}
+      edge_styles << edge.role.style
+
+      if edge.role.style == "Balanced"
+        (edge_player[:rating].to_d * 1.05.to_d)
+      else
+        edge_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # IDL Pass Rushing Rating Calculations
+    interior_players = passrush_depth.dup.map do |player|
+      if player.role.name == "IDL"
+        power = player.archetypes.detect{|a| a.name == "Power Rusher"}.overall_rating.to_d
+        speed = player.archetypes.detect{|a| a.name == "Speed Rusher"}.overall_rating.to_d
+        rating = if speed > power
+          [speed * 0.5.to_d, power * 0.5.to_d].sum
+        else
+          [power * 0.9.to_d, speed * 0.1.to_d].sum
+        end
+
+        {id: player.id, rating: rating}
+      else
+        nil
+      end
+    end.compact.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
+
+    interior_rating = (interior_players.map do |interior_player|
+      interior = passrush_depth.detect{|p| p.id == interior_player[:id]}
+
+      if interior.role.style == "Balanced"
+        (interior_player[:rating].to_d * 1.01.to_d)
+      else
+        interior_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # Final Pass Rushing Rating Calculations
+    passrush_rating = [
+      edge_rating * 0.75.to_d,
+      interior_rating * 0.25.to_d
+    ].sum
+
+    if edge_styles.uniq.size == 1 && edge_styles.first == "Balanced"
+      (passrush_rating * 1.05.to_d).round(2)
+    else
+      passrush_rating.round(2)
+    end
   end
 
   def get_rundefense_rating(team_id)
-    linemen = Player.includes(:categories).where(team_id: team_id, position: ["DT", "LE", "RE"])
-    outside_linebackers = Player.includes(:categories).where(team_id: team_id, position: ["LOLB", "ROLB"])
-    inside_linebackers = Player.includes(:categories).where(team_id: team_id, position: "MLB")
-    safeties = Player.includes(:categories).where(team_id: team_id, position: "SS")
+    defensiveline_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"])
+    linebacker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LOLB", "MLB", "ROLB"])
+    safety_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["FS", "SS"])
 
-    interior_players = []
-    edge_players = []
-    offball_players = []
 
-    linemen.each do |lineman|
-      interior = lineman.categories.to_a.detect{|p| p.name == "Interior Rusher"}.rating.to_d
-      interior.zero? ? (edge_players << lineman) : (interior_players << lineman)
+    # IDL Run Defense Rating Calculations
+    interior_players = defensiveline_depth.dup.map do |player|
+      if player.role.name == "IDL"
+        {id: player.id, rating: player.archetypes.detect{|a| a.name == "Run Stopper"}.overall_rating}
+      else
+        nil
+      end
+    end.compact.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
+
+    interior_rating = (interior_players.map do |interior_player|
+      interior = defensiveline_depth.detect{|p| p.id == interior_player[:id]}
+
+      if interior.role.style == "Balanced"
+        (interior_player[:rating].to_d * 1.01.to_d)
+      else
+        interior_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # EDGE Run Defense Rating Calculations
+    edge_players = defensiveline_depth.dup.map do |player|
+      if player.role.name == "EDGE"
+        {id: player.id, rating: player.archetypes.detect{|a| a.name == "Run Stopper"}.overall_rating}
+      else
+        nil
+      end
+    end.compact.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
+
+    edge_rating = (edge_players.map do |edge_player|
+      edge = defensiveline_depth.detect{|p| p.id == edge_player[:id]}
+
+      if edge.role.style == "Balanced"
+        (edge_player[:rating].to_d * 1.01.to_d)
+      else
+        edge_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # LB Run Defense Rating Calculations
+    linebacker_players = linebacker_depth.dup.map do |player|
+      if player.role.name == "LB"
+        {id: player.id, rating: player.archetypes.detect{|a| a.name == "Run Stopper"}.overall_rating}
+      else
+        nil
+      end
+    end.compact.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
+
+    linebacker_rating = (linebacker_players.map do |linebacker_player|
+      linebacker = linebacker_depth.detect{|p| p.id == linebacker_player[:id]}
+
+      if linebacker.role.style == "Balanced"
+        (linebacker_player[:rating].to_d * 1.01.to_d)
+      else
+        linebacker_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # S Run Defense Rating Calculations
+    safety_player = safety_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.detect{|a| a.name == "Run Support"}.overall_rating}
+    end.sort{|a, b| b[:rating] <=> a[:rating]}.first
+
+    safety = safety_depth.detect{|p| p.id == safety_player[:id]}
+
+    safety_rating = if safety.role.style == "Balanced"
+      (safety_player[:rating].to_d * 1.01.to_d)
+    else
+      safety_player[:rating].to_d
     end
 
-    outside_linebackers.each do |linebacker|
-      edge = linebacker.categories.to_a.detect{|p| p.name == "Edge Rusher"}.rating.to_d
-      offball = ([
-        linebacker.categories.to_a.detect{|p| p.name == "Run Stopper"}.rating.to_d,
-        linebacker.categories.to_a.detect{|p| p.name == "Pass Coverage"}.rating.to_d
-      ].sum / 2.to_d).floor
 
-      edge >= offball ? (edge_players << linebacker) : (offball_players << linebacker)
-    end
-
-    inside_linebackers.each do |linebacker|
-      offball_players << linebacker
-    end
-
-    interior_rating = (interior_players.map do |lineman|
-      lineman.categories.to_a.detect{|p| p.name == "Run Stopper"}.rating.to_d
-    end.max(2).sum / 2.to_d)
-
-    edge_rating = (edge_players.map do |lineman|
-      lineman.categories.to_a.detect{|p| p.name == "Run Stopper"}.rating.to_d
-    end.max(2).sum / 2.to_d)
-
-    linebacker_rating = (offball_players.map do |linebacker|
-      linebacker.categories.to_a.detect{|p| p.name == "Run Stopper"}.rating.to_d
-    end.max(2).sum / 2.to_d)
-
-    safety_rating = safeties.map do |safety|
-      safety.categories.to_a.detect{|p| p.name == "Run Stopper"}.rating.to_d
-    end.max
-
+    # Final Run Defense Rating Calculations
     [
-      interior_rating * 0.5.to_d,
+      interior_rating * 0.45.to_d,
       linebacker_rating * 0.3.to_d,
-      safety_rating * 0.1.to_d,
-      edge_rating * 0.1.to_d
-    ].sum.floor.to_i
+      edge_rating * 0.15.to_d,
+      safety_rating * 0.1.to_d
+    ].sum.round(2)
   end
 
   def get_passcoverage_rating(team_id)
-    defensivebacks = Player.includes(:categories).where(team_id: team_id, position: "CB")
-    linebackers = Player.includes(:categories).where(team_id: team_id, position: ["MLB", "LOLB", "ROLB"])
-    safeties = Player.includes(:categories).where(team_id: team_id, position: ["FS", "SS"])
+    cornerback_depth = Player.includes(:role).where(team_id: team_id, position: "CB")
+    safety_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["FS", "SS"])
+    linebacker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["MLB", "LOLB", "ROLB"])
+    styles = []
 
-    slotback_id = nil
-    slot_rating = 0.to_d
 
-    outside_rating = defensivebacks.each do |defensiveback|
-      rating = defensiveback.categories.to_a.detect{|p| p.name == "Slot Coverage"}.rating.to_d
-      next if slot_rating >= rating
-      slotback_id = defensiveback.id
-      slot_rating = rating
-    end
+    # CB Coverage Rating Calculations
+    cornerback_players = cornerback_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}[0..2]
 
-    outside_rating = (defensivebacks.map do |defensiveback|
-      if defensiveback.id == slotback_id
-        0
+    cornerback_rating = (cornerback_players.map do |player|
+      styles << player.role.style
+
+      if player.role.style == "Balanced"
+        (player.role.rating.to_d * 1.01.to_d)
       else
-        defensiveback.categories.to_a.detect{|p| p.name == "Outside Coverage"}.rating.to_d
+        player.role.rating.to_d
       end
-    end.max(2).sum / 2.to_d)
+    end.sum / 3.to_d)
 
-    linebacker_rating = (linebackers.map do |linebacker|
-      linebacker.categories.to_a.detect{|p| p.name == "Pass Coverage"}.rating.to_d
-    end.max(2).sum / 2.to_d)
 
-    safety_rating = (safeties.map do |safety|
-      safety.categories.to_a.detect{|p| p.name == "Pass Coverage"}.rating.to_d
-    end.max(2).sum / 2.to_d)
+    # S Coverage Rating Calculations
+    safety_players = safety_depth.dup.map do |player|
+      {id: player.id, rating: player.archetypes.detect{|a| a.name == "Zone"}.overall_rating}
+    end.compact.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
 
-    [
-      outside_rating * 0.4.to_d,
-      slot_rating * 0.2.to_d,
+    safety_rating = (safety_players.map do |safety_player|
+      safety = safety_depth.detect{|p| p.id == safety_player[:id]}
+
+      if safety.role.style == "Balanced"
+        (safety_player[:rating].to_d * 1.01.to_d)
+      else
+        safety_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # LB Coverage Rating Calculations
+    linebacker_players = linebacker_depth.dup.map do |player|
+      if player.role.name == "LB"
+        {id: player.id, rating: player.archetypes.detect{|a| a.name == "Pass Coverage"}.overall_rating}
+      else
+        nil
+      end
+    end.compact.sort{|a, b| b[:rating] <=> a[:rating]}[0..1]
+
+    linebacker_rating = (linebacker_players.map do |linebacker_player|
+      linebacker = linebacker_depth.detect{|p| p.id == linebacker_player[:id]}
+
+      if linebacker.role.style == "Balanced"
+        (linebacker_player[:rating].to_d * 1.01.to_d)
+      else
+        linebacker_player[:rating].to_d
+      end
+    end.sum / 2.to_d)
+
+
+    # Final Coverage Rating Calculations
+    coverage_rating = [
+      cornerback_rating * 0.6.to_d,
       safety_rating * 0.25.to_d,
       linebacker_rating * 0.15.to_d
-    ].sum.floor.to_i
+    ].sum
+
+    if styles.sort == ["Balanced", "Balanced", "Slot"]
+      (coverage_rating * 1.1.to_d).round(2)
+    elsif styles.sort == ["Man", "Man", "Slot"] || styles.sort == ["Zone", "Zone", "Slot"]
+      (coverage_rating * 1.05.to_d).round(2)
+    else
+      coverage_rating.round(2)
+    end
   end
 
-  def get_specialteams_rating(team_id)
-    kicker = Player.includes(:categories).where(team_id: team_id, position: "K").order(overall_rating: :desc).first
-    punter = Player.includes(:categories).where(team_id: team_id, position: "P").order(overall_rating: :desc).first
+  def get_culture_rating(team)
+    grades = {"A+"=>100, "A"=>95, "A-"=>90, "B+"=>85, "B"=>80, "B-"=>75, "C+"=>70, "C"=>65, "C-"=>60, "D+"=>55, "D"=>50, "D-"=>45, "F+"=>40, "F"=>35, "F-"=>30}
+
+    prestige_rating = grades[team[:prestigedisplay]].to_d
+    reputation_rating = (team[:team_reputation].to_d / 100.to_d)
+    history_rating = team[:teamhistory].to_d
 
     [
-      kicker.categories.to_a.detect{|p| p.name == "Kicker"}.rating.to_d * 0.7.to_d,
-      punter.categories.to_a.detect{|p| p.name == "Kicker"}.rating.to_d * 0.3.to_d
-    ].sum.floor.to_i
+      prestige_rating * 0.6.to_d,
+      reputation_rating * 0.3.to_d,
+      history_rating * 0.1.to_d
+    ].sum.round(2)
+  end
+
+  def get_offense_rating(team_id, culture_rating, quarterback_rating, rushing_rating, receiving_rating, passprotect_rating)
+    coach = Coach.find_by(team_id: team_id)
+
+    [
+      coach.offense_rating.to_d * 0.1.to_d,
+      culture_rating.to_d * 0.05.to_d,
+      quarterback_rating.to_d * 0.3.to_d,
+      rushing_rating.to_d * 0.1.to_d,
+      receiving_rating.to_d * 0.25.to_d,
+      passprotect_rating.to_d * 0.2.to_d
+    ].sum.round(2)
+  end
+
+  def get_defense_rating(team_id, culture_rating, passrush_rating, rundefense_rating, passcoverage_rating)
+    coach = Coach.find_by(team_id: team_id)
+
+    [
+      coach.defense_rating.to_d * 0.1.to_d,
+      culture_rating.to_d * 0.05.to_d,
+      passrush_rating.to_d * 0.25.to_d,
+      rundefense_rating.to_d * 0.1.to_d,
+      passcoverage_rating.to_d * 0.5.to_d,
+    ].sum.round(2)
+  end
+
+  def get_specialteams_rating(team_id, culture_rating)
+    coach = Coach.find_by(team_id: team_id)
+    kicker_depth = Player.includes(:role).where(team_id: team_id, position: "K")
+    punter_depth = Player.includes(:role).where(team_id: team_id, position: "P")
+
+
+    # K Special Teams Rating Calculations
+    kicker = kicker_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}.first
+
+    kicker_rating = if kicker.role.style == "Balanced"
+      (kicker.role.rating.to_d * 1.01.to_d).round(2)
+    else
+      kicker.role.rating.to_d
+    end
+
+
+    # P Special Teams Rating Calculations
+    punter = punter_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}.first
+
+    punter_rating = if punter.role.style == "Balanced"
+      (punter.role.rating.to_d * 1.01.to_d).round(2)
+    else
+      punter.role.rating.to_d
+    end
+
+
+    # Final Special Teams Rating Calculations
+    [
+      coach.specialteams_rating.to_d * 0.2.to_d,
+      culture_rating.to_d * 0.05.to_d,
+      kicker_rating.to_d * 0.5.to_d,
+      punter_rating.to_d * 0.25.to_d
+    ].sum.round(2)
   end
 end

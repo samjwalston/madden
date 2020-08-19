@@ -5,17 +5,17 @@ class CreateTeams < ActiveRecord::Migration[5.1]
       t.string :name
       t.string :conference
       t.string :division
-      t.integer :overall_rating
-      t.integer :offense_rating
-      t.integer :defense_rating
-      t.integer :specialteams_rating
-      t.integer :quarterback_rating
-      t.integer :rushing_rating
-      t.integer :receiver_rating
-      t.integer :passprotect_rating
-      t.integer :passrush_rating
-      t.integer :rundefense_rating
-      t.integer :passcoverage_rating
+      t.decimal :overall_rating
+      t.decimal :offense_rating
+      t.decimal :defense_rating
+      t.decimal :specialteams_rating
+      t.decimal :quarterback_rating
+      t.decimal :rushing_rating
+      t.decimal :receiver_rating
+      t.decimal :passprotect_rating
+      t.decimal :passrush_rating
+      t.decimal :rundefense_rating
+      t.decimal :passcoverage_rating
     end
   end
 

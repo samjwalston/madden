@@ -7,6 +7,7 @@ class CreateProspects < ActiveRecord::Migration[5.1]
       t.string :role
       t.string :style
       t.string :grade
+      t.string :development_trait
       t.integer :age
       t.integer :draft_round
       t.integer :draft_pick
