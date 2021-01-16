@@ -3,7 +3,7 @@ ruby '2.6.5'
 
 gem 'rails', '~> 5.1.7', '>= 5.1.7'
 gem 'pg', '~> 1.2.0'
-gem 'puma', '~> 4.3.0'
+gem 'puma', '~> 4.3.5'
 gem 'resque', '~> 2.0.0'
 gem 'redis', '~> 4.1.0'
 gem 'rack-cors', '~> 1.1.0', require: 'rack/cors'
