@@ -17,6 +17,7 @@ class Import::Teams < ApplicationService
 
     CSV.foreach(Rails.root.join("teams.csv"), {headers: true, header_converters: :symbol}) do |row|
       next if row[:teamindex].to_i >= 32
+      # next unless row[:displayname].in?(["Colts","Seahawks"])
 
 
       team_id = (row[:teamindex].to_i + 1)
@@ -34,9 +35,9 @@ class Import::Teams < ApplicationService
       specialteams_rating = get_specialteams_rating(team_id, culture_rating)
 
       overall_rating = [
-        offense_rating.to_d * 0.6.to_d,
-        defense_rating.to_d * 0.39.to_d,
-        specialteams_rating.to_d * 0.01.to_d,
+        offense_rating.to_d * 0.58.to_d,
+        defense_rating.to_d * 0.38.to_d,
+        specialteams_rating.to_d * 0.04.to_d,
       ].sum.round(2)
 
 
@@ -89,7 +90,7 @@ class Import::Teams < ApplicationService
       "Raiders"=>{"Conference"=>"AFC", "Division"=>"West"},
       "Rams"=>{"Conference"=>"NFC", "Division"=>"West"},
       "Ravens"=>{"Conference"=>"AFC", "Division"=>"North"},
-      "Redskins"=>{"Conference"=>"NFC", "Division"=>"East"},
+      "Huskies"=>{"Conference"=>"NFC", "Division"=>"East"},
       "Saints"=>{"Conference"=>"NFC", "Division"=>"South"},
       "Seahawks"=>{"Conference"=>"NFC", "Division"=>"West"},
       "Steelers"=>{"Conference"=>"AFC", "Division"=>"North"},
@@ -100,21 +101,17 @@ class Import::Teams < ApplicationService
   end
 
   def get_quarterback_rating(team_id)
-    quarterback_depth = Player.includes(:role).where(team_id: team_id, position: "QB")
+    quarterback_depth = Player.includes(:role).where(team_id: team_id, position: "QB", injury_status: "Uninjured")
     quarterback = quarterback_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}.first
 
-    if quarterback.role.style == "Balanced"
-      (quarterback.role.rating.to_d * 1.1.to_d).round(2)
-    else
-      quarterback.role.rating.to_d
-    end
+    quarterback.role.rating.to_d rescue 0
   end
 
   def get_rushing_rating(team_id)
-    runningback_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: "HB")
-    interior_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"])
-    tackle_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"])
-    blocker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE", "FB"])
+    runningback_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: "HB", injury_status: "Uninjured")
+    interior_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"], injury_status: "Uninjured")
+    tackle_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"], injury_status: "Uninjured")
+    blocker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE", "FB"], injury_status: "Uninjured")
     styles = []
 
 
@@ -184,23 +181,23 @@ class Import::Teams < ApplicationService
 
     # Final Rushing Rating Calculations
     rushing_rating = [
-      runningback_rating * 0.4.to_d,
-      interior_rating * 0.3.to_d,
-      tackle_rating * 0.2.to_d,
-      blocker_rating * 0.1.to_d
+      runningback_rating * 0.25.to_d,
+      interior_rating * 0.45.to_d,
+      tackle_rating * 0.24.to_d,
+      blocker_rating * 0.06.to_d
     ].sum
 
     if styles.uniq.size == 1
-      (rushing_rating * 1.05.to_d).round(2)
+      (rushing_rating * 1.1.to_d).round(2)
     else
       rushing_rating.round(2)
     end
   end
 
   def get_receiving_rating(team_id)
-    widereceiver_depth = Player.includes(:role).where(team_id: team_id, position: "WR")
-    tightend_depth = Player.includes(:role).where(team_id: team_id, position: "TE")
-    runningback_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["HB", "FB"])
+    widereceiver_depth = Player.includes(:role).where(team_id: team_id, position: "WR", injury_status: "Uninjured")
+    tightend_depth = Player.includes(:role).where(team_id: team_id, position: "TE", injury_status: "Uninjured")
+    runningback_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["HB", "FB"], injury_status: "Uninjured")
     styles = []
 
 
@@ -209,12 +206,7 @@ class Import::Teams < ApplicationService
 
     widereceiver_rating = (widereceivers.map do |player|
       styles << player.role.style
-
-      if player.role.style == "Balanced"
-        (player.role.rating.to_d * 1.01.to_d)
-      else
-        player.role.rating.to_d
-      end
+      player.role.rating.to_d rescue 0
     end.sum / 3.to_d)
 
 
@@ -226,10 +218,10 @@ class Import::Teams < ApplicationService
     tightend = tightend_depth.detect{|p| p.id == tightend_player[:id]}
     possession = tightend.archetypes.detect{|a| a.name == "Possession"}.overall_rating.to_d
     vertical = tightend.archetypes.detect{|a| a.name == "Vertical Threat"}.overall_rating.to_d
-    tightend_player[:rating] = [possession * 0.6.to_d, vertical * 0.4.to_d].sum
+    tightend_player[:rating] = [possession * 0.5.to_d, vertical * 0.5.to_d].sum
 
     tightend_rating = if tightend.role.style == "Balanced"
-      (tightend_player[:rating].to_d * 1.1.to_d)
+      (tightend_player[:rating].to_d * 1.05.to_d)
     else
       tightend_player[:rating].to_d
     end
@@ -251,26 +243,34 @@ class Import::Teams < ApplicationService
 
     # Final Receiving Rating Calculations
     receiving_rating = [
-      widereceiver_rating * 0.8.to_d,
-      tightend_rating * 0.15.to_d,
-      runningback_rating * 0.05.to_d
+      widereceiver_rating * 0.78.to_d,
+      tightend_rating * 0.18.to_d,
+      runningback_rating * 0.04.to_d
     ].sum
 
     if styles.uniq.size == 3
-      if styles.first == "Balanced" && styles.include?("Slot") && styles.include?("Deep Threat")
+      if styles.sort == ["Balanced", "Deep Threat", "Slot"]
         (receiving_rating * 1.1.to_d).round(2)
       else
         (receiving_rating * 1.05.to_d).round(2)
       end
+    elsif styles.uniq.size == 2
+      if styles.sort == ["Balanced", "Balanced", "Slot"]
+        (receiving_rating * 1.1.to_d).round(2)
+      else
+        (receiving_rating * 1.025.to_d).round(2)
+      end
+    elsif styles.uniq.size == 1 && styles.first == "Balanced"
+      (receiving_rating * 1.05.to_d).round(2)
     else
       receiving_rating.round(2)
     end
   end
 
   def get_passprotect_rating(team_id)
-    tackle_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"])
-    interior_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"])
-    blocker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE", "FB"])
+    tackle_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"], injury_status: "Uninjured")
+    interior_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"], injury_status: "Uninjured")
+    blocker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE", "FB"], injury_status: "Uninjured")
 
 
     # OT Pass Protection Rating Calculations
@@ -321,14 +321,14 @@ class Import::Teams < ApplicationService
 
     # Final Pass Protection Rating Calculations
     [
-      tackle_rating * 0.55.to_d,
-      interior_rating * 0.4.to_d,
-      blocker_rating * 0.05.to_d
+      tackle_rating * 0.56.to_d,
+      interior_rating * 0.42.to_d,
+      blocker_rating * 0.02.to_d
     ].sum.round(2)
   end
 
   def get_passrush_rating(team_id)
-    passrush_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"])
+    passrush_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"], injury_status: "Uninjured")
     edge_styles = []
 
 
@@ -379,11 +379,13 @@ class Import::Teams < ApplicationService
 
     # Final Pass Rushing Rating Calculations
     passrush_rating = [
-      edge_rating * 0.75.to_d,
-      interior_rating * 0.25.to_d
+      edge_rating * 0.66.to_d,
+      interior_rating * 0.34.to_d
     ].sum
 
     if edge_styles.uniq.size == 1 && edge_styles.first == "Balanced"
+      (passrush_rating * 1.1.to_d).round(2)
+    elsif edge_styles.uniq.sort == ["Power", "Speed"]
       (passrush_rating * 1.05.to_d).round(2)
     else
       passrush_rating.round(2)
@@ -391,9 +393,9 @@ class Import::Teams < ApplicationService
   end
 
   def get_rundefense_rating(team_id)
-    defensiveline_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"])
-    linebacker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LOLB", "MLB", "ROLB"])
-    safety_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["FS", "SS"])
+    defensiveline_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"], injury_status: "Uninjured")
+    linebacker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LOLB", "MLB", "ROLB"], injury_status: "Uninjured")
+    safety_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["FS", "SS"], injury_status: "Uninjured")
 
 
     # IDL Run Defense Rating Calculations
@@ -472,17 +474,17 @@ class Import::Teams < ApplicationService
 
     # Final Run Defense Rating Calculations
     [
-      interior_rating * 0.45.to_d,
-      linebacker_rating * 0.3.to_d,
-      edge_rating * 0.15.to_d,
-      safety_rating * 0.1.to_d
+      interior_rating * 0.4.to_d,
+      linebacker_rating * 0.32.to_d,
+      edge_rating * 0.16.to_d,
+      safety_rating * 0.12.to_d
     ].sum.round(2)
   end
 
   def get_passcoverage_rating(team_id)
-    cornerback_depth = Player.includes(:role).where(team_id: team_id, position: "CB")
-    safety_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["FS", "SS"])
-    linebacker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["MLB", "LOLB", "ROLB"])
+    cornerback_depth = Player.includes(:role).where(team_id: team_id, position: "CB", injury_status: "Uninjured")
+    safety_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["FS", "SS"], injury_status: "Uninjured")
+    linebacker_depth = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["MLB", "LOLB", "ROLB"], injury_status: "Uninjured")
     styles = []
 
 
@@ -491,12 +493,7 @@ class Import::Teams < ApplicationService
 
     cornerback_rating = (cornerback_players.map do |player|
       styles << player.role.style
-
-      if player.role.style == "Balanced"
-        (player.role.rating.to_d * 1.01.to_d)
-      else
-        player.role.rating.to_d
-      end
+      player.role.rating.to_d rescue 0
     end.sum / 3.to_d)
 
 
@@ -538,9 +535,9 @@ class Import::Teams < ApplicationService
 
     # Final Coverage Rating Calculations
     coverage_rating = [
-      cornerback_rating * 0.6.to_d,
+      cornerback_rating * 0.55.to_d,
       safety_rating * 0.25.to_d,
-      linebacker_rating * 0.15.to_d
+      linebacker_rating * 0.2.to_d
     ].sum
 
     if styles.sort == ["Balanced", "Balanced", "Slot"]
@@ -553,16 +550,16 @@ class Import::Teams < ApplicationService
   end
 
   def get_culture_rating(team)
-    grades = {"A+"=>100, "A"=>95, "A-"=>90, "B+"=>85, "B"=>80, "B-"=>75, "C+"=>70, "C"=>65, "C-"=>60, "D+"=>55, "D"=>50, "D-"=>45, "F+"=>40, "F"=>35, "F-"=>30}
+    grades = {"A+"=>97, "A"=>94, "A-"=>90, "B+"=>87, "B"=>84, "B-"=>80, "C+"=>77, "C"=>74, "C-"=>70, "D+"=>67, "D"=>64, "D-"=>60, "F+"=>57, "F"=>54, "F-"=>50}
 
     prestige_rating = grades[team[:prestigedisplay]].to_d
     reputation_rating = (team[:team_reputation].to_d / 100.to_d)
     history_rating = team[:teamhistory].to_d
 
     [
-      prestige_rating * 0.6.to_d,
-      reputation_rating * 0.3.to_d,
-      history_rating * 0.1.to_d
+      prestige_rating * 0.5.to_d,
+      reputation_rating * 0.35.to_d,
+      history_rating * 0.15.to_d
     ].sum.round(2)
   end
 
@@ -571,11 +568,11 @@ class Import::Teams < ApplicationService
 
     [
       coach.offense_rating.to_d * 0.1.to_d,
-      culture_rating.to_d * 0.05.to_d,
-      quarterback_rating.to_d * 0.3.to_d,
-      rushing_rating.to_d * 0.1.to_d,
-      receiving_rating.to_d * 0.25.to_d,
-      passprotect_rating.to_d * 0.2.to_d
+      culture_rating.to_d * 0.03.to_d,
+      quarterback_rating.to_d * 0.38.to_d,
+      rushing_rating.to_d * 0.12.to_d,
+      receiving_rating.to_d * 0.23.to_d,
+      passprotect_rating.to_d * 0.14.to_d
     ].sum.round(2)
   end
 
@@ -583,46 +580,36 @@ class Import::Teams < ApplicationService
     coach = Coach.find_by(team_id: team_id)
 
     [
-      coach.defense_rating.to_d * 0.1.to_d,
-      culture_rating.to_d * 0.05.to_d,
-      passrush_rating.to_d * 0.25.to_d,
-      rundefense_rating.to_d * 0.1.to_d,
-      passcoverage_rating.to_d * 0.5.to_d,
+      coach.defense_rating.to_d * 0.17.to_d,
+      culture_rating.to_d * 0.03.to_d,
+      passrush_rating.to_d * 0.24.to_d,
+      rundefense_rating.to_d * 0.12.to_d,
+      passcoverage_rating.to_d * 0.44.to_d,
     ].sum.round(2)
   end
 
   def get_specialteams_rating(team_id, culture_rating)
     coach = Coach.find_by(team_id: team_id)
-    kicker_depth = Player.includes(:role).where(team_id: team_id, position: "K")
-    punter_depth = Player.includes(:role).where(team_id: team_id, position: "P")
+    kicker_depth = Player.includes(:role).where(team_id: team_id, position: "K", injury_status: "Uninjured")
+    punter_depth = Player.includes(:role).where(team_id: team_id, position: "P", injury_status: "Uninjured")
 
 
     # K Special Teams Rating Calculations
     kicker = kicker_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}.first
-
-    kicker_rating = if kicker.role.style == "Balanced"
-      (kicker.role.rating.to_d * 1.01.to_d).round(2)
-    else
-      kicker.role.rating.to_d
-    end
+    kicker_rating = kicker.role.rating.to_d rescue 0
 
 
     # P Special Teams Rating Calculations
     punter = punter_depth.to_a.sort{|a, b| b.role.rating <=> a.role.rating}.first
-
-    punter_rating = if punter.role.style == "Balanced"
-      (punter.role.rating.to_d * 1.01.to_d).round(2)
-    else
-      punter.role.rating.to_d
-    end
+    punter_rating = punter.role.rating.to_d rescue 0
 
 
     # Final Special Teams Rating Calculations
     [
-      coach.specialteams_rating.to_d * 0.2.to_d,
-      culture_rating.to_d * 0.05.to_d,
-      kicker_rating.to_d * 0.5.to_d,
-      punter_rating.to_d * 0.25.to_d
+      coach.specialteams_rating.to_d * 0.47.to_d,
+      culture_rating.to_d * 0.03.to_d,
+      kicker_rating.to_d * 0.3.to_d,
+      punter_rating.to_d * 0.2.to_d
     ].sum.round(2)
   end
 end

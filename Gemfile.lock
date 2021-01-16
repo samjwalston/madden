@@ -44,6 +44,7 @@ GEM
     builder (3.2.4)
     concurrent-ruby (1.1.6)
     crass (1.0.6)
+    distribution (0.8.0)
     dotenv (2.7.5)
     dotenv-rails (2.7.5)
       dotenv (= 2.7.5)
@@ -153,6 +154,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (~> 1.0.0)
+  distribution
   dotenv-rails (~> 2.7.0)
   pg (~> 1.2.0)
   puma (~> 4.3.0)

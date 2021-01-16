@@ -14,4 +14,5 @@ gem 'activerecord-import', '~> 1.0.0'
 
 group :development do
   gem 'dotenv-rails', '~> 2.7.0'
+  gem 'distribution'
 end

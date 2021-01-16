@@ -101,6 +101,7 @@ class Import::Players < ApplicationService
         cap_hit: cap_hit,
         cap_savings: cap_savings,
         cap_penalty: cap_penalty,
+        injury_status: row[:injurystatus],
       }
     end
 
@@ -201,24 +202,28 @@ class Import::Players < ApplicationService
   end
 
   def get_quarterback_role(archetypes)
-    role_value = 0.18.to_d
+    role_value = 0.2204.to_d
 
     field_general = archetypes.detect{|a| a[:name] == "Field General"}.to_h[:rating].to_d
     improviser = archetypes.detect{|a| a[:name] == "Improviser"}.to_h[:rating].to_d
     strong_arm = archetypes.detect{|a| a[:name] == "Strong Arm"}.to_h[:rating].to_d
     scrambler = archetypes.detect{|a| a[:name] == "Scrambler"}.to_h[:rating].to_d
-    max_rating = [field_general, improviser, strong_arm].max
+    max_rating = [field_general, improviser, strong_arm, scrambler].max
 
-    is_balanced = (field_general.between?(max_rating - 3, max_rating) && improviser.between?(max_rating - 3, max_rating) && strong_arm.between?(max_rating - 3, max_rating))
-    is_not_scrambler = (scrambler < max_rating)
+    is_balanced = (
+      field_general.between?(max_rating - 3, max_rating) &&
+      improviser.between?(max_rating - 3, max_rating) &&
+      strong_arm.between?(max_rating - 3, max_rating) &&
+      scrambler.between?(max_rating - 3, max_rating)
+    )
 
-    balanced = [field_general * 0.4.to_d, improviser * 0.4.to_d, strong_arm * 0.2.to_d].sum
+    balanced = [field_general * 0.3.to_d, improviser * 0.3.to_d, strong_arm * 0.3.to_d, scrambler * 0.1.to_d].sum
     pocket = [field_general * 0.6.to_d, strong_arm * 0.4.to_d].sum
-    scrambler = [scrambler * 0.6.to_d, improviser * 0.4.to_d].sum
+    scrambler = [scrambler * 0.5.to_d, improviser * 0.5.to_d].sum
 
 
-    if is_balanced && is_not_scrambler && balanced >= pocket && balanced >= scrambler
-      {name: "QB", style: "Balanced", rating: balanced.round, value: ((balanced * 1.1.to_d) * role_value).round(2)}
+    if is_balanced
+      {name: "QB", style: "Balanced", rating: balanced.round, value: ((balanced * 1.05.to_d) * role_value).round(2)}
     elsif scrambler > pocket
       {name: "QB", style: "Scrambler", rating: scrambler.round, value: (scrambler * role_value).round(2)}
     else
@@ -227,10 +232,10 @@ class Import::Players < ApplicationService
   end
 
   def get_runningback_role(archetypes)
-    role_value = 0.0315.to_d
+    role_value = 0.0227.to_d
 
-    power = archetypes.detect{|a| a[:name] == "Elusive Back"}.to_h[:rating].to_d
-    elusive = archetypes.detect{|a| a[:name] == "Power Back"}.to_h[:rating].to_d
+    elusive = archetypes.detect{|a| a[:name] == "Elusive Back"}.to_h[:rating].to_d
+    power = archetypes.detect{|a| a[:name] == "Power Back"}.to_h[:rating].to_d
     receiving = archetypes.detect{|a| a[:name] == "Receiving Back"}.to_h[:rating].to_d
     power_or_elusive = [power, elusive].max
 
@@ -250,13 +255,13 @@ class Import::Players < ApplicationService
   end
 
   def get_fullback_role(archetypes)
-    role_value = 0.0195.to_d
+    role_value = 0.0095.to_d
 
     utility = archetypes.detect{|a| a[:name] == "Utility"}.to_h[:rating].to_d
     blocking = archetypes.detect{|a| a[:name] == "Blocking"}.to_h[:rating].to_d
 
     is_balanced = utility.between?(blocking - 3, blocking + 3)
-    rating = [blocking * 0.6.to_d, utility * 0.4.to_d].sum
+    rating = [blocking * 0.45.to_d, utility * 0.55.to_d].sum
 
 
     if is_balanced
@@ -269,53 +274,60 @@ class Import::Players < ApplicationService
   end
 
   def get_receiver_role(archetypes)
-    role_value = 0.04.to_d
+    role_value = 0.0347.to_d
 
     route_runner = archetypes.detect{|a| a[:name] == "Route Runner"}.to_h[:rating].to_d
     slot = archetypes.detect{|a| a[:name] == "Slot"}.to_h[:rating].to_d
     deep_threat = archetypes.detect{|a| a[:name] == "Deep Threat"}.to_h[:rating].to_d
     physical = archetypes.detect{|a| a[:name] == "Physical"}.to_h[:rating].to_d
-    max_rating = [route_runner, slot, deep_threat].max
+    max_rating = [route_runner, slot, deep_threat, physical].max
 
-    is_balanced = (route_runner.between?(max_rating - 3, max_rating) && slot.between?(max_rating - 3, max_rating) && deep_threat.between?(max_rating - 3, max_rating))
-    is_not_physical = (physical < max_rating)
+    is_balanced = (
+      route_runner.between?(max_rating - 3, max_rating) &&
+      slot.between?(max_rating - 3, max_rating) &&
+      deep_threat.between?(max_rating - 3, max_rating) &&
+      physical.between?(max_rating - 3, max_rating)
+    )
 
-    balanced = [route_runner * 0.5.to_d, deep_threat * 0.25.to_d, slot * 0.25.to_d].sum
+    balanced = [route_runner * 0.5.to_d, deep_threat * 0.2.to_d, slot * 0.2.to_d, physical * 0.1.to_d].sum
     slot_rating = [slot * 0.75.to_d, route_runner * 0.25.to_d].sum
     deep_rating = [deep_threat * 0.75.to_d, route_runner * 0.25.to_d].sum
     red_zone_rating = [physical * 0.75.to_d, route_runner * 0.25.to_d].sum
 
 
-    if is_balanced && is_not_physical
-      {name: "WR", style: "Balanced", rating: balanced.round, value: ((balanced * 1.01.to_d) * role_value).round(2)}
-    elsif red_zone_rating > [route_runner, slot_rating, deep_rating].max
+    if is_balanced
+      {name: "WR", style: "Balanced", rating: balanced.round, value: ((balanced * 1.05.to_d) * role_value).round(2)}
+    elsif red_zone_rating > [slot_rating, deep_rating, route_runner].max
       {name: "WR", style: "Red Zone Threat", rating: red_zone_rating.round, value: (red_zone_rating * role_value).round(2)}
-    elsif deep_rating > [route_runner, slot_rating].max
-      {name: "WR", style: "Deep Threat", rating: deep_rating.round, value: (deep_rating * role_value).round(2)}
-    elsif slot_rating > route_runner
+    elsif slot_rating > [deep_rating, route_runner].max
       {name: "WR", style: "Slot", rating: slot_rating.round, value: (slot_rating * role_value).round(2)}
+    elsif deep_rating > route_runner
+      {name: "WR", style: "Deep Threat", rating: deep_rating.round, value: (deep_rating * role_value).round(2)}
     else
       {name: "WR", style: "Route Runner", rating: route_runner.round, value: (route_runner * role_value).round(2)}
     end
   end
 
   def get_tightend_role(archetypes)
-    role_value = 0.0345.to_d
+    role_value = 0.0298.to_d
 
     possession = archetypes.detect{|a| a[:name] == "Possession"}.to_h[:rating].to_d
     vertical = archetypes.detect{|a| a[:name] == "Vertical Threat"}.to_h[:rating].to_d
     blocking = archetypes.detect{|a| a[:name] == "Blocking"}.to_h[:rating].to_d
     max_rating = [possession, vertical, blocking].max
 
-    is_balanced = (possession.between?(max_rating - 3, max_rating) && vertical.between?(max_rating - 3, max_rating) && blocking.between?(max_rating - 3, max_rating))
-    is_not_blocker = (blocking < max_rating)
+    is_balanced = (
+      possession.between?(max_rating - 3, max_rating) &&
+      vertical.between?(max_rating - 3, max_rating) &&
+      blocking.between?(max_rating - 3, max_rating)
+    )
 
-    receiver = [possession * 0.6.to_d, vertical * 0.4.to_d].sum
-    balanced = [receiver * 0.65.to_d, blocking * 0.35.to_d].sum
+    receiver = [possession * 0.5.to_d, vertical * 0.5.to_d].sum
+    balanced = [receiver * 0.8.to_d, blocking * 0.2.to_d].sum
 
 
-    if is_balanced && is_not_blocker
-      {name: "TE", style: "Balanced", rating: balanced.round, value: ((balanced * 1.1.to_d) * role_value).round(2)}
+    if is_balanced
+      {name: "TE", style: "Balanced", rating: balanced.round, value: ((balanced * 1.05.to_d) * role_value).round(2)}
     elsif blocking > receiver
       {name: "TE", style: "Blocker", rating: blocking.round, value: ((blocking * 0.9.to_d) * role_value).round(2)}
     else
@@ -324,7 +336,7 @@ class Import::Players < ApplicationService
   end
 
   def get_offensive_tackle_role(archetypes)
-    role_value = 0.039.to_d
+    role_value = 0.0311.to_d
 
     pass_protect = archetypes.detect{|a| a[:name] == "Pass Protector"}.to_h[:rating].to_d
     power = archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d
@@ -347,7 +359,7 @@ class Import::Players < ApplicationService
   end
 
   def get_interior_offensive_line_role(archetypes)
-    role_value = 0.022.to_d
+    role_value = 0.0218.to_d
 
     pass_protect = archetypes.detect{|a| a[:name] == "Pass Protector"}.to_h[:rating].to_d
     power = archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d
@@ -370,8 +382,8 @@ class Import::Players < ApplicationService
   end
 
   def get_edge_rusher_role(archetypes, position, weight)
-    return nil if weight >= 120
-    role_value = 0.0395.to_d
+    return nil if weight >= 130
+    role_value = 0.0337.to_d
 
     power = archetypes.detect{|a| a[:name] == "Power Rusher"}.to_h[:rating].to_d
     speed = archetypes.detect{|a| a[:name] == "Speed Rusher"}.to_h[:rating].to_d
@@ -400,8 +412,8 @@ class Import::Players < ApplicationService
   end
 
   def get_interior_defensive_line_role(archetypes, weight)
-    return nil if weight < 120
-    role_value = 0.021.to_d
+    return nil if weight < 130
+    role_value = 0.0246.to_d
 
     power = archetypes.detect{|a| a[:name] == "Power Rusher"}.to_h[:rating].to_d
     speed = archetypes.detect{|a| a[:name] == "Speed Rusher"}.to_h[:rating].to_d
@@ -428,7 +440,7 @@ class Import::Players < ApplicationService
   end
 
   def get_linebacker_role(archetypes, position, weight)
-    role_value = 0.0205.to_d
+    role_value = 0.024.to_d
 
     run_stopper = archetypes.detect{|a| a[:name] == "Run Stopper"}.to_h[:rating].to_d
     pass_coverage = archetypes.detect{|a| a[:name] == "Pass Coverage"}.to_h[:rating].to_d
@@ -453,14 +465,19 @@ class Import::Players < ApplicationService
   end
 
   def get_cornerback_role(archetypes)
-    role_value = 0.039.to_d
+    role_value = 0.0307.to_d
 
     man = archetypes.detect{|a| a[:name] == "Man to Man"}.to_h[:rating].to_d
     zone = archetypes.detect{|a| a[:name] == "Zone"}.to_h[:rating].to_d
     slot = archetypes.detect{|a| a[:name] == "Slot"}.to_h[:rating].to_d
     max_rating = [man, zone, slot].max
 
-    is_balanced = (man.between?(max_rating - 3, max_rating) && zone.between?(max_rating - 3, max_rating) && slot.between?(max_rating - 3, max_rating))
+    is_balanced = (
+      man.between?(max_rating - 3, max_rating) &&
+      zone.between?(max_rating - 3, max_rating) &&
+      slot.between?(max_rating - 3, max_rating)
+    )
+
     rating = if slot > zone && slot > man
       [slot * 0.8.to_d, zone * 0.1.to_d, man * 0.1.to_d].sum
     elsif zone > man
@@ -482,27 +499,32 @@ class Import::Players < ApplicationService
   end
 
   def get_safety_role(archetypes)
-    role_value = 0.0332.to_d
+    role_value = 0.0237.to_d
 
     coverage = archetypes.detect{|a| a[:name] == "Zone"}.to_h[:rating].to_d
     run_support = archetypes.detect{|a| a[:name] == "Run Support"}.to_h[:rating].to_d
+    hybrid = archetypes.detect{|a| a[:name] == "Hybrid"}.to_h[:rating].to_d
+    max_rating = [coverage, run_support, hybrid].max
 
-    is_balanced = run_support.between?(coverage - 3, coverage + 3)
-    is_not_run_stopper = (run_support < coverage)
+    is_balanced = (
+      coverage.between?(max_rating - 3, max_rating) &&
+      run_support.between?(max_rating - 3, max_rating)
+    )
+
     rating = [coverage * 0.9.to_d, run_support * 0.1.to_d].sum
 
 
-    if is_balanced && is_not_run_stopper
+    if is_balanced
       {name: "S", style: "Balanced", rating: rating.round, value: ((rating * 1.01.to_d) * role_value).round(2)}
     elsif run_support > coverage
-      {name: "S", style: "Run Support", rating: rating.round, value: (rating * role_value).round(2)}
+      {name: "S", style: "Run Support", rating: rating.round, value: ((rating * 0.95.to_d) * role_value).round(2)}
     else
       {name: "S", style: "Coverage", rating: rating.round, value: (rating * role_value).round(2)}
     end
   end
 
   def get_kicker_role(archetypes)
-    role_value = 0.004.to_d
+    role_value = 0.012.to_d
 
     accurate = archetypes.detect{|a| a[:name] == "Accurate"}.to_h[:rating].to_d
     power = archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d
@@ -520,7 +542,7 @@ class Import::Players < ApplicationService
   end
 
   def get_punter_role(archetypes)
-    role_value = 0.002.to_d
+    role_value = 0.008.to_d
 
     accurate = archetypes.detect{|a| a[:name] == "Accurate"}.to_h[:rating].to_d
     power = archetypes.detect{|a| a[:name] == "Power"}.to_h[:rating].to_d

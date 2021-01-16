@@ -7,6 +7,7 @@ class CreatePlayers < ActiveRecord::Migration[5.1]
       t.string :position
       t.string :development_trait
       t.string :status
+      t.string :injury_status
       t.integer :age
       t.integer :overall_rating
       t.integer :draft_round
