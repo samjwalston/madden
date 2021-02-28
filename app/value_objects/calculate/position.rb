@@ -36,8 +36,8 @@ class Calculate::Position
     players = @players.map do |p|
       archetypes = (styles.empty? ? p.archetypes : p.archetypes.to_a.find_all{|a| a.name.in?(styles)})
       archetype = archetypes.sort{|a, b| b.overall_rating <=> a.overall_rating}.first
-      archetype.attributes
-    end.sort{|a, b| b["overall_rating"] <=> a["overall_rating"]}
+      archetype.attributes.symbolize_keys
+    end.sort{|a, b| b[:overall_rating] <=> a[:overall_rating]}
 
     player_count == 1 ? players.first : players[0...player_count]
   end
