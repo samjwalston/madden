@@ -11,7 +11,7 @@ class Calculate::Quarterback < Calculate::Position
 
   # Team(players)
   def calculate_rating
-    get_roles(1)
+    get_roles(1)["overall_rating"]
   end
 
   # Player(archetypes)
