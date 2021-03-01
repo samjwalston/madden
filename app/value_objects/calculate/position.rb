@@ -15,7 +15,7 @@ class Calculate::Position
 
   def role
     @role unless @role.nil?
-    archetype = get_role
+    archetype = get_roles(1)
 
     @role = {
       name: role_name,
@@ -28,17 +28,20 @@ class Calculate::Position
 
   private
 
-  def get_role
-    @archetypes.to_a.sort{|a, b| b[:overall_rating] <=> a[:overall_rating]}.first
-  end
-
   def get_roles(player_count, *styles)
-    players = @players.map do |p|
-      archetypes = (styles.empty? ? p.archetypes : p.archetypes.to_a.find_all{|a| a.name.in?(styles)})
-      archetype = archetypes.sort{|a, b| b.overall_rating <=> a.overall_rating}.first
-      archetype.attributes.symbolize_keys
-    end.sort{|a, b| b[:overall_rating] <=> a[:overall_rating]}
+    if !@players.empty?
+      players = @players.map do |p|
+        archetypes = (styles.empty? ? p.archetypes : p.archetypes.to_a.find_all{|a| a.name.in?(styles)})
+        archetype = archetypes.sort{|a, b| b.overall_rating <=> a.overall_rating}.first
+        archetype.attributes.symbolize_keys
+      end.sort{|a, b| b[:overall_rating] <=> a[:overall_rating]}
 
-    player_count == 1 ? players.first : players[0...player_count]
+      player_count == 1 ? players.first : players[0...player_count]
+    elsif !@archetypes.empty?
+      archetypes = (styles.empty? ? @archetypes : @archetypes.to_a.find_all{|a| a[:name].in?(styles)})
+      archetypes.sort{|a, b| b[:overall_rating] <=> a[:overall_rating]}.first
+    else
+      nil
+    end
   end
 end

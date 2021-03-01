@@ -30,7 +30,7 @@ class Import::Players < ApplicationJob
       next unless row[:contractstatus] == "FreeAgent" || (row[:contractstatus] == "Signed" && row[:teamindex].to_i < 32)
 
       player_id += 1
-      next unless row[:position].in?(["QB"])
+      next unless row[:position].in?(["QB","HB"])
 
       player_archetypes = []
       cap_hit, cap_savings, cap_penalty = 0, 0, 0
@@ -110,44 +110,39 @@ class Import::Players < ApplicationJob
     role = nil
 
     role_names.each do |role_name|
-      case role_name
-      when "QB"
+      if role_name == "QB"
         role = Calculate::Quarterback.new(archetypes: archetypes).role
-      # when "HB"
-      #   roles << get_runningback_role(archetypes)
-      # when "FB"
+      elsif role_name == "HB"
+        role = Calculate::Runningback.new(archetypes: archetypes).role
+      # elsif role_name == "FB"
       #   roles << get_fullback_role(archetypes)
-      # when "WR"
+      # elsif role_name == "WR"
       #   roles << get_receiver_role(archetypes)
-      # when "TE"
+      # elsif role_name == "TE"
       #   roles << get_tightend_role(archetypes)
-      # when "OT"
+      # elsif role_name == "OT"
       #   roles << get_offensive_tackle_role(archetypes)
-      # when "IOL"
+      # elsif role_name == "IOL"
       #   roles << get_interior_offensive_line_role(archetypes)
-      # when "EDGE"
+      # elsif role_name == "EDGE"
       #   roles << get_edge_rusher_role(archetypes, position, weight)
-      # when "IDL"
+      # elsif role_name == "IDL"
       #   roles << get_interior_defensive_line_role(archetypes, weight)
-      # when "LB"
+      # elsif role_name == "LB"
       #   roles << get_linebacker_role(archetypes, position, weight)
-      # when "CB"
+      # elsif role_name == "CB"
       #   roles << get_cornerback_role(archetypes)
-      # when "S"
+      # elsif role_name == "S"
       #   roles << get_safety_role(archetypes)
-      # when "K"
+      # elsif role_name == "K"
       #   roles << get_kicker_role(archetypes)
-      # when "P"
+      # elsif role_name == "P"
       #   roles << get_punter_role(archetypes)
       end
     end
 
     role
   end
-
-  # def get_runningback_role(archetypes)
-  #   Calculate::Runningback.call(archetypes).player_rating
-  # end
 
   # def get_fullback_role(archetypes)
   #   Calculate::Fullback.call(archetypes).player_rating

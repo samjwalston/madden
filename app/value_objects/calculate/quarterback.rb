@@ -9,7 +9,7 @@ class Calculate::Quarterback < Calculate::Position
     "QB"
   end
 
-  # Team(players)
+  # Team:Passing(players)
   def calculate_rating
     passing_rating
   end
@@ -19,9 +19,9 @@ class Calculate::Quarterback < Calculate::Position
   # FreeAgency(players)
   def calculate_value
     if @category == "player"
-      (get_role[:overall_rating] * PLAYER_VALUE).round(4)
+      (passing_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (get_role[:overall_rating] * PROSPECT_VALUE).round(4)
+      (passing_rating * PROSPECT_VALUE).round(4)
     elsif @category == "free_agency"
       (passing_rating * PLAYER_VALUE).round(2).to_f
     end

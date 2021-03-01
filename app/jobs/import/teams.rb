@@ -24,8 +24,8 @@ class Import::Teams < ApplicationJob
 
       team_id = (row[:teamindex].to_i + 1)
       quarterback_rating = get_quarterback_rating(team_id)
-      rushing_rating = 0#get_rushing_rating(team_id)
-      receiving_rating = 0#get_receiving_rating(team_id)
+      rushing_rating = get_rushing_rating(team_id)
+      receiving_rating = get_receiving_rating(team_id)
       passprotect_rating = 0#get_passprotect_rating(team_id)
       passrush_rating = 0#get_passrush_rating(team_id)
       rundefense_rating = 0#get_rundefense_rating(team_id)
@@ -107,75 +107,77 @@ class Import::Teams < ApplicationJob
 
   def get_quarterback_rating(team_id)
     quaterbacks = get_players(team_id, "QB")
-    Calculate::Quarterback.new(players: quaterbacks).rating rescue 0
+    Calculate::Quarterback.new(players: quaterbacks).rating
   end
 
-  # def get_rushing_rating(team_id, styles = [])
-  #   runningbacks = Player.includes(:archetypes, :role).where(team_id: team_id, position: "HB", injury_status: "Uninjured")
-  #   interior_offensive_linemen = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"], injury_status: "Uninjured")
-  #   offensive_tackles = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"], injury_status: "Uninjured")
-  #   blockers = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE", "FB"], injury_status: "Uninjured")
-  #
-  #   # HB Rushing Rating Calculations
-  #   runningback = Calculate::Runningback.call(runningbacks)
-  #   runningback_rating = runningback.team_value("rushing")
-  #   styles << (runningback.rushing_style == "Elusive Back" ? "Finesse" : "Power")
-  #
-  #   # IOL Rushing Rating Calculations
-  #   offensive_lineman = Calculate::InteriorOffensiveLine.call(interior_offensive_linemen)
-  #   interior_offensive_line_rating = offensive_lineman.team_value("run_blocking")
-  #   styles << (offensive_lineman.run_block_styles.map{|s| s == "Agile" ? "Finesse" : "Power"})
-  #
-  #   # OT Rushing Rating Calculations
-  #   offensive_tackle = Calculate::OffensiveTackle.call(offensive_tackles)
-  #   offensive_tackle_rating = offensive_tackle.team_value("run_blocking")
-  #   styles << (offensive_tackle.run_block_styles.map{|s| s == "Agile" ? "Finesse" : "Power"})
-  #
-  #   # TE/FB Rushing Rating Calculations
-  #   blocker_rating = Calculate::TightEnd.call(blockers).team_value("blocking")
-  #
-  #   # Final Rushing Rating Calculations
-  #   rushing_rating = [
-  #     runningback_rating * 0.25.to_d,
-  #     interior_offensive_line_rating * 0.45.to_d,
-  #     offensive_tackle_rating * 0.24.to_d,
-  #     blocker_rating * 0.06.to_d
-  #   ].sum
-  #
-  #   # Rushing Scheme Bonus
-  #   styles.uniq.size == 1 ? (rushing_rating * 1.03.to_d).round(2) : rushing_rating.round(2)
-  # end
+  def get_rushing_rating(team_id, styles = [])
+    runningbacks = get_players(team_id, "HB")
+    # interior_offensive_linemen = get_players(team_id, "LG", "C", "RG")
+    # offensive_tackles = get_players(team_id, "LT", "RT")
+    # blockers = get_players(team_id, "TE", "FB")
 
-  # def get_receiving_rating(team_id)
-  #   wide_receivers = Player.includes(:role).where(team_id: team_id, position: "WR", injury_status: "Uninjured")
-  #   tight_ends = Player.includes(:role).where(team_id: team_id, position: "TE", injury_status: "Uninjured")
-  #   runningbacks = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["HB", "FB"], injury_status: "Uninjured")
-  #
-  #   # WR Receiving Rating Calculations
-  #   receiving_core = Calculate::WideReceiver.call(wide_receivers)
-  #   wide_receiver_rating = receiving_core.team_value
-  #
-  #   # TE Receiving Rating Calculations
-  #   tight_end_rating = Calculate::TightEnd.call(tight_ends).team_value("receiving")
-  #
-  #   # HB/FB Receiving Rating Calculations
-  #   runningback_rating = Calculate::Runningback.call(runningbacks).team_value("receiving")
-  #
-  #   # Final Receiving Rating Calculations
-  #   receiving_rating = [
-  #     wide_receiver_rating * 0.78.to_d,
-  #     tight_end_rating * 0.18.to_d,
-  #     runningback_rating * 0.04.to_d
-  #   ].sum
-  #
-  #   # Receiving Scheme Bonus
-  #   receiving_core.scheme_fit_bonus(receiving_rating).round(2)
-  # end
+    # HB Rushing Rating Calculations
+    runningback = Calculate::Runningback.new(category: "rushing", players: runningbacks)
+    runningback_rating = runningback.rating
+    styles << (runningback.rushing_style == "Elusive Back" ? "Finesse" : "Power")
+
+    # IOL Rushing Rating Calculations
+    # offensive_lineman = Calculate::InteriorOffensiveLine.call(interior_offensive_linemen)
+    interior_offensive_line_rating = 0#offensive_lineman.team_value("run_blocking")
+    # styles << (offensive_lineman.run_block_styles.map{|s| s == "Agile" ? "Finesse" : "Power"})
+
+    # OT Rushing Rating Calculations
+    # offensive_tackle = Calculate::OffensiveTackle.call(offensive_tackles)
+    offensive_tackle_rating = 0#offensive_tackle.team_value("run_blocking")
+    # styles << (offensive_tackle.run_block_styles.map{|s| s == "Agile" ? "Finesse" : "Power"})
+
+    # TE/FB Rushing Rating Calculations
+    blocker_rating = 0#Calculate::TightEnd.call(blockers).team_value("blocking")
+
+    # Final Rushing Rating Calculations
+    rushing_rating = [
+      runningback_rating * 0.25.to_d,
+      interior_offensive_line_rating * 0.45.to_d,
+      offensive_tackle_rating * 0.24.to_d,
+      blocker_rating * 0.06.to_d
+    ].sum
+
+    # Rushing Scheme Bonus
+    styles.uniq.size == 1 ? (rushing_rating * 1.03.to_d) : rushing_rating
+  end
+
+  def get_receiving_rating(team_id)
+    # wide_receivers = get_players(team_id, "WR")
+    # tight_ends = get_players(team_id, "TE")
+    runningbacks = get_players(team_id, "HB", "FB")
+
+    # WR Receiving Rating Calculations
+    # receiving_core = Calculate::WideReceiver.call(wide_receivers)
+    wide_receiver_rating = 0#receiving_core.team_value
+
+    # TE Receiving Rating Calculations
+    tight_end_rating = 0#Calculate::TightEnd.call(tight_ends).team_value("receiving")
+
+    # HB/FB Receiving Rating Calculations
+    runningback = Calculate::Runningback.new(category: "receiving", players: runningbacks)
+    runningback_rating = runningback.rating
+
+    # Final Receiving Rating Calculations
+    receiving_rating = [
+      wide_receiver_rating * 0.78.to_d,
+      tight_end_rating * 0.18.to_d,
+      runningback_rating * 0.04.to_d
+    ].sum
+
+    # Receiving Scheme Bonus
+    # receiving_core.scheme_fit_bonus(receiving_rating).round(2)
+    receiving_rating
+  end
 
   # def get_passprotect_rating(team_id)
   #   offensive_tackles = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"], injury_status: "Uninjured")
   #   interior_offensive_linemen = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"], injury_status: "Uninjured")
-  #   blockers = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["TE"], injury_status: "Uninjured")
+  #   blockers = Player.includes(:archetypes, :role).where(team_id: team_id, position: "TE", injury_status: "Uninjured")
   #
   #   # OT Pass Protection Rating Calculations
   #   offensive_tackle_rating = Calculate::OffensiveTackle.call(offensive_tackles).team_value("pass_blocking")
@@ -295,18 +297,11 @@ class Import::Teams < ApplicationJob
   #   punters = Player.includes(:role).where(team_id: team_id, position: "P", injury_status: "Uninjured")
   #
   #   # K Special Teams Rating Calculations
-  #   kicker_rating = begin
-  #     Calculate::Kicker.call(kickers).team_value
-  #   rescue
-  #     Calculate::Punter.call(punters).team_value
-  #   end
+  #   kicker_rating = Calculate::Kicker.call(kickers).team_value
   #
   #   # P Special Teams Rating Calculations
-  #   punter_rating = begin
-  #     Calculate::Punter.call(punters).team_value
-  #   rescue
-  #     Calculate::Kicker.call(kickers).team_value
-  #   end
+  #   punter_rating = Calculate::Punter.call(punters).team_value
+  #
   #   # Final Special Teams Rating Calculations
   #   [
   #     coach.specialteams_rating.to_d * 0.5.to_d,

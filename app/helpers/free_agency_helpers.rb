@@ -3,10 +3,9 @@ module FreeAgencyHelpers
     Calculate::Quarterback.new(category: "free_agency", players: get_players(names, "QB")).value
   end
 
-  # def get_runningback_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: "HB", name: names)
-  #   Calculate::Runningback.call(players).player_value
-  # end
+  def rb_value(*names)
+    Calculate::Runningback.new(category: "free_agency", players: get_players(names, "HB")).value
+  end
 
   # def get_receiver_rating(*names)
   #   players = Player.includes(:role).where(position: "WR", name: names)
