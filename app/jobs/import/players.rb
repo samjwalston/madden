@@ -30,7 +30,7 @@ class Import::Players < ApplicationJob
       next unless row[:contractstatus] == "FreeAgent" || (row[:contractstatus] == "Signed" && row[:teamindex].to_i < 32)
 
       player_id += 1
-      next unless row[:position].in?(["QB","HB","FB","WR","TE"])
+      next unless row[:position].in?(["QB","HB","FB","WR","TE","LT","LG","C","RG","RT"])
 
       player_archetypes = []
       cap_hit, cap_savings, cap_penalty = 0, 0, 0
@@ -123,10 +123,10 @@ class Import::Players < ApplicationJob
         role = Calculate::WideReceiver.new(archetypes: archetypes).role
       elsif role_name == "TE"
         role = Calculate::TightEnd.new(archetypes: archetypes).role
-      # elsif role_name == "OT"
-      #   roles << get_offensive_tackle_role(archetypes)
-      # elsif role_name == "IOL"
-      #   roles << get_interior_offensive_line_role(archetypes)
+      elsif role_name == "OT"
+        role = Calculate::OffensiveTackle.new(archetypes: archetypes).role
+      elsif role_name == "IOL"
+        role = Calculate::InteriorOffensiveLine.new(archetypes: archetypes).role
       # elsif role_name == "EDGE"
       #   roles << get_edge_rusher_role(archetypes, position, weight)
       # elsif role_name == "IDL"
@@ -146,14 +146,6 @@ class Import::Players < ApplicationJob
 
     role
   end
-
-  # def get_offensive_tackle_role(archetypes)
-  #   Calculate::OffensiveTackle.call(archetypes).player_rating
-  # end
-
-  # def get_interior_offensive_line_role(archetypes)
-  #   Calculate::InteriorOffensiveLine.call(archetypes).player_rating
-  # end
 
   # def get_edge_rusher_role(archetypes, position, weight)
   #   return nil if weight >= 120

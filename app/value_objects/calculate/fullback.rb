@@ -1,6 +1,6 @@
 class Calculate::Fullback < Calculate::Position
   PLAYER_VALUE = 0.0095.to_d.freeze
-  PROSPECT_VALUE = 0.8211.to_d.freeze
+  PROSPECT_VALUE = 0.8422.to_d.freeze
 
 
   private

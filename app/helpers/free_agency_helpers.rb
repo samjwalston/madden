@@ -11,20 +11,17 @@ module FreeAgencyHelpers
     Calculate::WideReceiver.new(category: "free_agency", players: get_players(names, "WR")).value
   end
 
-  # def get_tightend_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: "TE", name: names)
-  #   Calculate::TightEnd.call(players).player_value
-  # end
+  def te_value(*names)
+    Calculate::TightEnd.new(category: "free_agency", players: get_players(names, "TE")).value
+  end
 
-  # def get_offensive_tackle_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: ["LT", "RT"], name: names)
-  #   Calculate::OffensiveTackle.call(players).player_value
-  # end
+  def ot_value(*names)
+    Calculate::OffensiveTackle.new(category: "free_agency", players: get_players(names, "LT", "RT")).value
+  end
 
-  # def get_interior_offensive_line_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: ["LG", "C", "RG"], name: names)
-  #   Calculate::InteriorOffensiveLine.call(players).player_value
-  # end
+  def iol_value(*names)
+    Calculate::InteriorOffensiveLine.new(category: "free_agency", players: get_players(names, "LG", "C", "RG")).value
+  end
 
   # def get_edge_rusher_rating(*names)
   #   players = Player.includes(:archetypes, :role).where(position: ["DT", "LE", "RE", "LOLB", "ROLB"], name: names)
