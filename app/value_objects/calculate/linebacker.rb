@@ -9,6 +9,10 @@ class Calculate::Linebacker < Calculate::Position
     "LB"
   end
 
+  def roles
+    @roles ||= ["Run Stopper", "Pass Coverage", "Field General"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:Coverage(players)

@@ -15,6 +15,10 @@ class Calculate::TightEnd < Calculate::Position
     "TE"
   end
 
+  def roles
+    @roles ||= ["Blocking", "Vertical Threat", "Possession"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:Receiving(players)

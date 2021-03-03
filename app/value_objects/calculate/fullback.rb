@@ -9,6 +9,10 @@ class Calculate::Fullback < Calculate::Position
     "FB"
   end
 
+  def roles
+    @roles ||= ["Blocking", "Utility"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   def calculate_rating

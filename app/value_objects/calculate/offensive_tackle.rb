@@ -15,6 +15,10 @@ class Calculate::OffensiveTackle < Calculate::Position
     "OT"
   end
 
+  def roles
+    @roles ||= ["Power", "Agile", "Pass Protector"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:PassBlocking(players)

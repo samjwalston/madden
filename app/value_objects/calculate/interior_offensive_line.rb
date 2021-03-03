@@ -15,6 +15,10 @@ class Calculate::InteriorOffensiveLine < Calculate::Position
     "IOL"
   end
 
+  def roles
+    @roles ||= ["Power", "Agile", "Pass Protector"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:PassBlocking(players)

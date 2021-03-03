@@ -30,8 +30,6 @@ class Import::Players < ApplicationJob
       next unless row[:contractstatus] == "FreeAgent" || (row[:contractstatus] == "Signed" && row[:teamindex].to_i < 32)
 
       player_id += 1
-      next unless row[:position].in?(["QB","HB","FB","WR","TE","LT","LG","C","RG","RT","LE","RE","DT","LOLB","MLB","ROLB"])
-
       player_archetypes = []
       cap_hit, cap_savings, cap_penalty = 0, 0, 0
 
@@ -133,8 +131,8 @@ class Import::Players < ApplicationJob
         role ||= Calculate::InteriorDefensiveLine.new(archetypes: archetypes).role
       elsif role_name == "LB"
         role ||= Calculate::Linebacker.new(archetypes: archetypes).role
-      # elsif role_name == "CB"
-      #   role = Calculate::Cornerback.new(archetypes: archetypes).role
+      elsif role_name == "CB"
+        role = Calculate::Cornerback.new(archetypes: archetypes).role
       # elsif role_name == "S"
       #   role = Calculate::Safety.new(archetypes: archetypes).role
       # elsif role_name == "K"

@@ -9,6 +9,10 @@ class Calculate::InteriorDefensiveLine < Calculate::Position
     "IDL"
   end
 
+  def roles
+    @roles ||= ["Run Stopper", "Speed Rusher", "Power Rusher"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:PassRush(players)

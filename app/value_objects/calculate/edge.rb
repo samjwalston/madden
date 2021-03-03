@@ -14,6 +14,10 @@ class Calculate::Edge < Calculate::Position
     "ED"
   end
 
+  def roles
+    @roles ||= ["Run Stopper", "Power Rusher", "Speed Rusher"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:PassRush(players)

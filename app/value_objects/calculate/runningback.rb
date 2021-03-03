@@ -19,6 +19,10 @@ class Calculate::Runningback < Calculate::Position
     "HB"
   end
 
+  def roles
+    @roles ||= ["Receiving Back", "Power Back", "Elusive Back"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:Rushing(players)

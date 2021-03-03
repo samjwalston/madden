@@ -9,6 +9,10 @@ class Calculate::Quarterback < Calculate::Position
     "QB"
   end
 
+  def roles
+    @roles ||= ["Scrambler", "Strong Arm", "Improviser", "Field General"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:Passing(players)

@@ -19,6 +19,10 @@ class Calculate::WideReceiver < Calculate::Position
     "WR"
   end
 
+  def roles
+    @roles ||= ["Physical", "Slot", "Deep Threat", "Route Runner"]
+  end
+
   # Player(archetypes)
   # Prospect(archetypes)
   # Team:Receiving(players)
