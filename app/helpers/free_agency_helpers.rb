@@ -23,30 +23,25 @@ module FreeAgencyHelpers
     Calculate::InteriorOffensiveLine.new(category: "free_agency", players: get_players(names, "LG", "C", "RG")).value
   end
 
-  # def get_edge_rusher_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: ["DT", "LE", "RE", "LOLB", "ROLB"], name: names)
-  #   Calculate::Edge.call(players).player_value
-  # end
+  def ed_value(*names)
+    Calculate::Edge.new(category: "free_agency", players: get_players(names, "DT", "LE", "RE", "LOLB", "ROLB")).value
+  end
 
-  # def get_interior_defensive_line_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: ["DT", "LE", "RE", "LOLB", "ROLB"], name: names)
-  #   Calculate::InteriorDefensiveLine.call(players).player_value
-  # end
+  def idl_value(*names)
+    Calculate::InteriorDefensiveLine.new(category: "free_agency", players: get_players(names, "DT", "LE", "RE", "LOLB", "ROLB")).value
+  end
 
-  # def get_linebacker_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: ["MLB", "LOLB", "ROLB"], name: names)
-  #   Calculate::Linebacker.call(players).player_value
-  # end
+  def lb_value(*names)
+    Calculate::Linebacker.new(category: "free_agency", players: get_players(names, "LOLB", "MLB", "ROLB")).value
+  end
 
-  # def get_cornerback_rating(*names)
-  #   players = Player.includes(:role).where(position: "CB", name: names)
-  #   Calculate::Cornerback.call(players).player_value
-  # end
+  def cb_value(*names)
+    Calculate::Cornerback.new(category: "free_agency", players: get_players(names, "CB")).value
+  end
 
-  # def get_safety_rating(*names)
-  #   players = Player.includes(:archetypes, :role).where(position: ["FS", "SS"], name: names)
-  #   Calculate::Safety.call(players).player_value
-  # end
+  def s_value(*names)
+    Calculate::Safety.new(category: "free_agency", players: get_players(names, "FS", "SS")).value
+  end
 
 
   private
