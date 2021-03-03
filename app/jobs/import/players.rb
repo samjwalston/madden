@@ -30,7 +30,7 @@ class Import::Players < ApplicationJob
       next unless row[:contractstatus] == "FreeAgent" || (row[:contractstatus] == "Signed" && row[:teamindex].to_i < 32)
 
       player_id += 1
-      next unless row[:position].in?(["QB","HB","FB","WR","TE","LT","LG","C","RG","RT"])
+      next unless row[:position].in?(["QB","HB","FB","WR","TE","LT","LG","C","RG","RT","LE","RE","DT","LOLB","MLB","ROLB"])
 
       player_archetypes = []
       cap_hit, cap_savings, cap_penalty = 0, 0, 0
@@ -127,53 +127,23 @@ class Import::Players < ApplicationJob
         role = Calculate::OffensiveTackle.new(archetypes: archetypes).role
       elsif role_name == "IOL"
         role = Calculate::InteriorOffensiveLine.new(archetypes: archetypes).role
-      # elsif role_name == "EDGE"
-      #   roles << get_edge_rusher_role(archetypes, position, weight)
-      # elsif role_name == "IDL"
-      #   roles << get_interior_defensive_line_role(archetypes, weight)
-      # elsif role_name == "LB"
-      #   roles << get_linebacker_role(archetypes, position, weight)
+      elsif role_name == "ED" && weight < 120
+        role = Calculate::Edge.new(archetypes: archetypes).role
+      elsif role_name == "IDL"
+        role ||= Calculate::InteriorDefensiveLine.new(archetypes: archetypes).role
+      elsif role_name == "LB"
+        role ||= Calculate::Linebacker.new(archetypes: archetypes).role
       # elsif role_name == "CB"
-      #   roles << get_cornerback_role(archetypes)
+      #   role = Calculate::Cornerback.new(archetypes: archetypes).role
       # elsif role_name == "S"
-      #   roles << get_safety_role(archetypes)
+      #   role = Calculate::Safety.new(archetypes: archetypes).role
       # elsif role_name == "K"
-      #   roles << get_kicker_role(archetypes)
+      #   role = Calculate::Kicker.new(archetypes: archetypes).role
       # elsif role_name == "P"
-      #   roles << get_punter_role(archetypes)
+      #   role = Calculate::Punter.new(archetypes: archetypes).role
       end
     end
 
-    role
+    (role || {})
   end
-
-  # def get_edge_rusher_role(archetypes, position, weight)
-  #   return nil if weight >= 120
-  #   Calculate::Edge.call(archetypes, position).player_rating
-  # end
-
-  # def get_interior_defensive_line_role(archetypes, weight)
-  #   return nil if weight < 120
-  #   Calculate::InteriorDefensiveLine.call(archetypes).player_rating
-  # end
-
-  # def get_linebacker_role(archetypes, position, weight)
-  #   Calculate::Linebacker.call(archetypes, position).player_rating
-  # end
-
-  # def get_cornerback_role(archetypes)
-  #   Calculate::Cornerback.call(archetypes).player_rating
-  # end
-
-  # def get_safety_role(archetypes)
-  #   Calculate::Safety.call(archetypes).player_rating
-  # end
-
-  # def get_kicker_role(archetypes)
-  #   Calculate::Kicker.call(archetypes).player_rating
-  # end
-
-  # def get_punter_role(archetypes)
-  #   Calculate::Punter.call(archetypes).player_rating
-  # end
 end

@@ -101,8 +101,8 @@ class Import::Teams < ApplicationJob
     }
   end
 
-  def get_players(team_id, *positions)
-    Player.includes(:archetypes).where(team_id: team_id, position: positions, injury_status: "Uninjured")
+  def get_players(team_id, *roles)
+    Player.includes(:archetypes).where(team_id: team_id, role: roles, injury_status: "Uninjured")
   end
 
   def get_quarterback_rating(team_id)
@@ -112,8 +112,8 @@ class Import::Teams < ApplicationJob
 
   def get_rushing_rating(team_id, styles = [])
     runningbacks = get_players(team_id, "HB")
-    interior_offensive_linemen = get_players(team_id, "LG", "C", "RG")
-    offensive_tackles = get_players(team_id, "LT", "RT")
+    interior_offensive_linemen = get_players(team_id, "IOL")
+    offensive_tackles = get_players(team_id, "OT")
     blockers = get_players(team_id, "TE", "FB")
 
     # HB Rushing Rating Calculations
@@ -176,8 +176,8 @@ class Import::Teams < ApplicationJob
   end
 
   def get_passprotect_rating(team_id)
-    offensive_tackles = get_players(team_id, "LT", "RT")
-    interior_offensive_linemen = get_players(team_id, "LG", "C", "RG")
+    offensive_tackles = get_players(team_id, "OT")
+    interior_offensive_linemen = get_players(team_id, "IOL")
     blockers = get_players(team_id, "TE")
 
     # OT Pass Protection Rating Calculations
@@ -198,13 +198,14 @@ class Import::Teams < ApplicationJob
   end
 
   def get_passrush_rating(team_id)
-    defensive_linemen = get_players(team_id, "DT", "LE", "RE", "LOLB", "ROLB")
+    edge_rushers = get_players(team_id, "ED")
+    interior_rushers = get_players(team_id, "IDL")
 
     # EDGE Pass Rushing Rating Calculations
-    edge_rush_rating = Calculate::Edge.new(category: "pass_rush", players: defensive_linemen).rating
+    edge_rush_rating = Calculate::Edge.new(category: "pass_rush", players: edge_rushers).rating
 
     # IDL Pass Rushing Rating Calculations
-    interior_rush_rating = 0#Calculate::InteriorDefensiveLine.new(category: "pass_rush", players: defensive_linemen).rating
+    interior_rush_rating = Calculate::InteriorDefensiveLine.new(category: "pass_rush", players: interior_rushers).rating
 
     # Final Pass Rushing Rating Calculations
     [
@@ -214,18 +215,19 @@ class Import::Teams < ApplicationJob
   end
 
   def get_rundefense_rating(team_id)
-    defensive_linemen = get_players(team_id, "DT", "LE", "RE", "LOLB", "ROLB")
-    # linebackers = get_players(team_id, "LOLB", "MLB", "ROLB")
-    # safeties = get_players(team_id, "FS", "SS")
+    edge_rushers = get_players(team_id, "ED")
+    interior_rushers = get_players(team_id, "IDL")
+    linebackers = get_players(team_id, "LB")
+    # safeties = get_players(team_id, "S")
 
     # IDL Run Defense Rating Calculations
-    interior_defensive_line_rating = 0#Calculate::InteriorDefensiveLine.new(category: "run_defense", players: defensive_linemen).rating
+    interior_defensive_line_rating = Calculate::InteriorDefensiveLine.new(category: "run_defense", players: interior_rushers).rating
 
     # EDGE Run Defense Rating Calculations
-    edge_rusher_rating = Calculate::Edge.new(category: "run_defense", players: defensive_linemen).rating
+    edge_rusher_rating = Calculate::Edge.new(category: "run_defense", players: edge_rushers).rating
 
     # LB Run Defense Rating Calculations
-    linebacker_rating = 0#Calculate::Linebacker.new(category: "run_defense", players: linebackers).rating
+    linebacker_rating = Calculate::Linebacker.new(category: "run_defense", players: linebackers).rating
 
     # S Run Defense Rating Calculations
     safety_rating = 0#Calculate::Safety.new(category: "run_defense", players: safeties).rating
@@ -241,8 +243,8 @@ class Import::Teams < ApplicationJob
 
   def get_passcoverage_rating(team_id, styles = [])
     # cornerbacks = get_players(team_id, "CB")
-    # safeties = get_players(team_id, "FS", "SS")
-    # linebackers = get_players(team_id, "LOLB", "MLB", "ROLB")
+    # safeties = get_players(team_id, "S")
+    linebackers = get_players(team_id, "LB")
 
     # CB Coverage Rating Calculations
     # coverage_unit = Calculate::Cornerback.new(category: "coverage", players: cornerbacks)
@@ -255,7 +257,7 @@ class Import::Teams < ApplicationJob
     # styles += safety.coverage_styles
 
     # LB Coverage Rating Calculations
-    linebacker_rating = 0#Calculate::Linebacker.new(category: "coverage", players: linebackers).rating
+    linebacker_rating = Calculate::Linebacker.new(category: "coverage", players: linebackers).rating
 
     # Final Coverage Rating Calculations
     coverage_rating = [
