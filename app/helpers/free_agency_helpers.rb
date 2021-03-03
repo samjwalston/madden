@@ -7,10 +7,9 @@ module FreeAgencyHelpers
     Calculate::Runningback.new(category: "free_agency", players: get_players(names, "HB")).value
   end
 
-  # def get_receiver_rating(*names)
-  #   players = Player.includes(:role).where(position: "WR", name: names)
-  #   Calculate::WideReceiver.call(players).player_value
-  # end
+  def wr_value(*names)
+    Calculate::WideReceiver.new(category: "free_agency", players: get_players(names, "WR")).value
+  end
 
   # def get_tightend_rating(*names)
   #   players = Player.includes(:archetypes, :role).where(position: "TE", name: names)

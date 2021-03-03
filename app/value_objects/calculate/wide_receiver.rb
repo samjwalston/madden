@@ -2,8 +2,6 @@ class Calculate::WideReceiver < Calculate::Position
   PLAYER_VALUE = 0.0347.to_d.freeze
   PROSPECT_VALUE = 0.9868.to_d.freeze
 
-  RECEIVING_CORE_VALUE = 0.1041.to_d.freeze
-
 
   def receiving_styles
     receiving_rating(3) if @receiving_styles.nil?
@@ -41,7 +39,7 @@ class Calculate::WideReceiver < Calculate::Position
     elsif @category == "prospect"
       (receiving_rating * PROSPECT_VALUE).round(4)
     elsif @category == "free_agency"
-      (scheme_fit_bonus(receiving_rating(3)) * RECEIVING_CORE_VALUE).round(2).to_f
+      (receiving_rating(3) * (PLAYER_VALUE * 3)).round(2).to_f
     end
   end
 

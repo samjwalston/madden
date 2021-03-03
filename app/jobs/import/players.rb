@@ -30,7 +30,7 @@ class Import::Players < ApplicationJob
       next unless row[:contractstatus] == "FreeAgent" || (row[:contractstatus] == "Signed" && row[:teamindex].to_i < 32)
 
       player_id += 1
-      next unless row[:position].in?(["QB","HB","FB","WR"])
+      next unless row[:position].in?(["QB","HB","FB","WR","TE"])
 
       player_archetypes = []
       cap_hit, cap_savings, cap_penalty = 0, 0, 0
@@ -121,8 +121,8 @@ class Import::Players < ApplicationJob
         role = Calculate::Fullback.new(archetypes: archetypes).role
       elsif role_name == "WR"
         role = Calculate::WideReceiver.new(archetypes: archetypes).role
-      # elsif role_name == "TE"
-      #   roles << get_tightend_role(archetypes)
+      elsif role_name == "TE"
+        role = Calculate::TightEnd.new(archetypes: archetypes).role
       # elsif role_name == "OT"
       #   roles << get_offensive_tackle_role(archetypes)
       # elsif role_name == "IOL"
@@ -146,10 +146,6 @@ class Import::Players < ApplicationJob
 
     role
   end
-
-  # def get_tightend_role(archetypes)
-  #   Calculate::TightEnd.call(archetypes).player_rating
-  # end
 
   # def get_offensive_tackle_role(archetypes)
   #   Calculate::OffensiveTackle.call(archetypes).player_rating

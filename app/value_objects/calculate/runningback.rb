@@ -1,11 +1,6 @@
 class Calculate::Runningback < Calculate::Position
   PLAYER_VALUE = 0.0227.to_d.freeze
-  PLAYER_RUSHING_VALUE = 0.0174.to_d.freeze
-  PLAYER_RECEIVING_VALUE = 0.0053.to_d.freeze
-
   PROSPECT_VALUE = 0.9568.to_d.freeze
-  PROSPECT_RUSHING_VALUE = 0.7333.to_d.freeze
-  PROSPECT_RECEIVING_VALUE = 0.2235.to_d.freeze
 
 
   def rushing_style
@@ -30,7 +25,7 @@ class Calculate::Runningback < Calculate::Position
   # Team:Receiving(players)
   def calculate_rating
     if @category.in?(["player", "prospect"])
-      calculated_rating.round
+      total_rating.round
     elsif @category == "rushing"
       rushing_rating
     elsif @category == "receiving"
@@ -43,11 +38,11 @@ class Calculate::Runningback < Calculate::Position
   # FreeAgency(players)
   def calculate_value
     if @category == "player"
-      ((rushing_rating * PLAYER_RUSHING_VALUE) + (receiving_rating * PLAYER_RECEIVING_VALUE)).round(4)
+      (total_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      ((rushing_rating * PROSPECT_RUSHING_VALUE) + (receiving_rating * PROSPECT_RECEIVING_VALUE)).round(4)
+      (total_rating * PROSPECT_VALUE).round(4)
     elsif @category == "free_agency"
-      ((rushing_rating * PLAYER_RUSHING_VALUE) + (receiving_rating * PLAYER_RECEIVING_VALUE)).round(2).to_f
+      (total_rating * PLAYER_VALUE).round(2).to_f
     end
   end
 
@@ -62,7 +57,7 @@ class Calculate::Runningback < Calculate::Position
     @receiving_rating ||= get_roles(1, "Receiving Back", "Utility")[:overall_rating]
   end
 
-  def calculated_rating
+  def total_rating
     [rushing_rating.to_d * 0.7665.to_d, receiving_rating.to_d * 0.2335.to_d].sum
   end
 end

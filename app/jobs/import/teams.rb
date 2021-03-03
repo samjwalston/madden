@@ -26,12 +26,12 @@ class Import::Teams < ApplicationJob
       quarterback_rating = get_quarterback_rating(team_id)
       rushing_rating = get_rushing_rating(team_id)
       receiving_rating = get_receiving_rating(team_id)
-      passprotect_rating = 0#get_passprotect_rating(team_id)
+      passprotect_rating = get_passprotect_rating(team_id)
       passrush_rating = 0#get_passrush_rating(team_id)
       rundefense_rating = 0#get_rundefense_rating(team_id)
       passcoverage_rating = 0#get_passcoverage_rating(team_id)
 
-      offense_rating = 0#get_offense_rating(team_id, quarterback_rating, rushing_rating, receiving_rating, passprotect_rating)
+      offense_rating = get_offense_rating(team_id, quarterback_rating, rushing_rating, receiving_rating, passprotect_rating)
       defense_rating = 0#get_defense_rating(team_id, passrush_rating, rundefense_rating, passcoverage_rating)
       specialteams_rating = 0#get_specialteams_rating(team_id)
 
@@ -39,7 +39,7 @@ class Import::Teams < ApplicationJob
         offense_rating.to_d * 0.58.to_d,
         defense_rating.to_d * 0.38.to_d,
         specialteams_rating.to_d * 0.04.to_d,
-      ].sum.round(2)
+      ].sum
 
 
       records << {
@@ -47,17 +47,17 @@ class Import::Teams < ApplicationJob
         name: row[:displayname],
         conference: team_info[row[:displayname]]["Conference"],
         division: team_info[row[:displayname]]["Division"],
-        overall_rating: overall_rating,
-        offense_rating: offense_rating,
-        defense_rating: defense_rating,
-        specialteams_rating: specialteams_rating,
-        quarterback_rating: quarterback_rating,
-        rushing_rating: rushing_rating,
-        receiver_rating: receiving_rating,
-        passprotect_rating: passprotect_rating,
-        passrush_rating: passrush_rating,
-        rundefense_rating: rundefense_rating,
-        passcoverage_rating: passcoverage_rating,
+        overall_rating: overall_rating.round(2),
+        offense_rating: offense_rating.round(2),
+        defense_rating: defense_rating.round(2),
+        specialteams_rating: specialteams_rating.round(2),
+        quarterback_rating: quarterback_rating.round(2),
+        rushing_rating: rushing_rating.round(2),
+        receiver_rating: receiving_rating.round(2),
+        passprotect_rating: passprotect_rating.round(2),
+        passrush_rating: passrush_rating.round(2),
+        rundefense_rating: rundefense_rating.round(2),
+        passcoverage_rating: passcoverage_rating.round(2),
       }
     end
 
@@ -114,7 +114,7 @@ class Import::Teams < ApplicationJob
     runningbacks = get_players(team_id, "HB")
     # interior_offensive_linemen = get_players(team_id, "LG", "C", "RG")
     # offensive_tackles = get_players(team_id, "LT", "RT")
-    # blockers = get_players(team_id, "TE", "FB")
+    blockers = get_players(team_id, "TE", "FB")
 
     # HB Rushing Rating Calculations
     runningback = Calculate::Runningback.new(category: "rushing", players: runningbacks)
@@ -132,7 +132,7 @@ class Import::Teams < ApplicationJob
     # styles << (offensive_tackle.run_block_styles.map{|s| s == "Agile" ? "Finesse" : "Power"})
 
     # TE/FB Rushing Rating Calculations
-    blocker_rating = 0#Calculate::TightEnd.call(blockers).team_value("blocking")
+    blocker_rating = Calculate::TightEnd.new(category: "blocking", players: blockers).rating
 
     # Final Rushing Rating Calculations
     rushing_rating = [
@@ -143,27 +143,26 @@ class Import::Teams < ApplicationJob
     ].sum
 
     # Rushing Scheme Bonus
-    runningback.rushing_scheme_bonus(rushing_rating)
+    runningback.rushing_scheme_bonus(rushing_rating, styles)
   end
 
   def get_receiving_rating(team_id, styles = [])
     wide_receivers = get_players(team_id, "WR")
-    # tight_ends = get_players(team_id, "TE")
+    tight_ends = get_players(team_id, "TE")
     runningbacks = get_players(team_id, "HB", "FB")
 
     # WR Receiving Rating Calculations
-    receiving_core = Calculate::WideReceiver.call(category: "receiving", players: wide_receivers)
+    receiving_core = Calculate::WideReceiver.new(category: "receiving", players: wide_receivers)
     wide_receiver_rating = receiving_core.rating
     styles += receiving_core.receiving_styles
 
     # TE Receiving Rating Calculations
-    # tight_end = Calculate::TightEnd.call(tight_ends).team_value("receiving")
-    tight_end_rating = 0#tight_end.team_value
-    # styles << tight_end.receiving_style
+    tight_end = Calculate::TightEnd.new(category: "receiving", players: tight_ends)
+    tight_end_rating = tight_end.rating
+    styles << tight_end.receiving_style
 
     # HB/FB Receiving Rating Calculations
-    runningback = Calculate::Runningback.new(category: "receiving", players: runningbacks)
-    runningback_rating = runningback.rating
+    runningback_rating = Calculate::Runningback.new(category: "receiving", players: runningbacks).rating
 
     # Final Receiving Rating Calculations
     receiving_rating = [
@@ -173,30 +172,30 @@ class Import::Teams < ApplicationJob
     ].sum
 
     # Receiving Scheme Bonus
-    receiving_core.receiving_scheme_bonus(receiving_rating)
+    receiving_core.receiving_scheme_bonus(receiving_rating, styles)
   end
 
-  # def get_passprotect_rating(team_id)
-  #   offensive_tackles = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LT", "RT"], injury_status: "Uninjured")
-  #   interior_offensive_linemen = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["LG", "C", "RG"], injury_status: "Uninjured")
-  #   blockers = Player.includes(:archetypes, :role).where(team_id: team_id, position: "TE", injury_status: "Uninjured")
-  #
-  #   # OT Pass Protection Rating Calculations
-  #   offensive_tackle_rating = Calculate::OffensiveTackle.call(offensive_tackles).team_value("pass_blocking")
-  #
-  #   # IOL Pass Protection Rating Calculations
-  #   interior_offensive_line_rating = Calculate::InteriorOffensiveLine.call(interior_offensive_linemen).team_value("pass_blocking")
-  #
-  #   # TE Pass Protection Rating Calculations
-  #   blocker_rating = Calculate::TightEnd.call(blockers).team_value("blocking")
-  #
-  #   # Final Pass Protection Rating Calculations
-  #   [
-  #     offensive_tackle_rating * 0.56.to_d,
-  #     interior_offensive_line_rating * 0.42.to_d,
-  #     blocker_rating * 0.02.to_d
-  #   ].sum.round(2)
-  # end
+  def get_passprotect_rating(team_id)
+    # offensive_tackles = get_players(team_id, "LT", "RT")
+    # interior_offensive_linemen = get_players(team_id, "LG", "C", "RG")
+    blockers = get_players(team_id, "TE")
+
+    # OT Pass Protection Rating Calculations
+    offensive_tackle_rating = 0#Calculate::OffensiveTackle.call(offensive_tackles).team_value("pass_blocking")
+
+    # IOL Pass Protection Rating Calculations
+    interior_offensive_line_rating = 0#Calculate::InteriorOffensiveLine.call(interior_offensive_linemen).team_value("pass_blocking")
+
+    # TE Pass Protection Rating Calculations
+    blocker_rating = Calculate::TightEnd.new(category: "blocking", players: blockers).rating
+
+    # Final Pass Protection Rating Calculations
+    [
+      offensive_tackle_rating * 0.56.to_d,
+      interior_offensive_line_rating * 0.42.to_d,
+      blocker_rating * 0.02.to_d
+    ].sum
+  end
 
   # def get_passrush_rating(team_id)
   #   defensive_linemen = Player.includes(:archetypes, :role).where(team_id: team_id, position: ["DT", "LE", "RE", "LOLB", "ROLB"], injury_status: "Uninjured")
@@ -215,7 +214,7 @@ class Import::Teams < ApplicationJob
   #   ].sum
   #
   #   # Pass Rushing Scheme Bonus
-  #   edge_rusher.scheme_fit_bonus(pass_rush_rating).round(2)
+  #   edge_rusher.scheme_fit_bonus(pass_rush_rating)
   # end
 
   # def get_rundefense_rating(team_id)
@@ -241,7 +240,7 @@ class Import::Teams < ApplicationJob
   #     linebacker_rating * 0.32.to_d,
   #     edge_rusher_rating * 0.16.to_d,
   #     safety_rating * 0.12.to_d
-  #   ].sum.round(2)
+  #   ].sum
   # end
 
   # def get_passcoverage_rating(team_id)
@@ -267,30 +266,30 @@ class Import::Teams < ApplicationJob
   #   ].sum
   #
   #   # Coverage Scheme Bonus
-  #   cornerback.scheme_fit_bonus(coverage_rating).round(2)
+  #   cornerback.scheme_fit_bonus(coverage_rating)
   # end
 
-  # def get_offense_rating(team_id, quarterback_rating, rushing_rating, receiving_rating, passprotect_rating)
-  #   coach = Coach.find_by(team_id: team_id)
-  #
-  #   [
-  #     coach.offense_rating.to_d * 0.13.to_d,
-  #     quarterback_rating.to_d * 0.38.to_d,
-  #     rushing_rating.to_d * 0.12.to_d,
-  #     receiving_rating.to_d * 0.23.to_d,
-  #     passprotect_rating.to_d * 0.14.to_d
-  #   ].sum.round(2)
-  # end
+  def get_offense_rating(team_id, quarterback_rating, rushing_rating, receiving_rating, passprotect_rating)
+    coach_rating = 0#Coach.select(:offense_rating).find_by(team_id: team_id).offense_rating
+
+    [
+      coach_rating.to_d * 0.13.to_d,
+      quarterback_rating.to_d * 0.38.to_d,
+      rushing_rating.to_d * 0.12.to_d,
+      receiving_rating.to_d * 0.23.to_d,
+      passprotect_rating.to_d * 0.14.to_d
+    ].sum
+  end
 
   # def get_defense_rating(team_id, passrush_rating, rundefense_rating, passcoverage_rating)
-  #   coach = Coach.find_by(team_id: team_id)
+  #   coach_rating = 0#Coach.select(:defense_rating).find_by(team_id: team_id).defense_rating
   #
   #   [
-  #     coach.defense_rating.to_d * 0.2.to_d,
+  #     coach_rating.to_d * 0.2.to_d,
   #     passrush_rating.to_d * 0.24.to_d,
   #     rundefense_rating.to_d * 0.12.to_d,
   #     passcoverage_rating.to_d * 0.44.to_d,
-  #   ].sum.round(2)
+  #   ].sum
   # end
 
   # def get_specialteams_rating(team_id)
@@ -309,6 +308,6 @@ class Import::Teams < ApplicationJob
   #     coach.specialteams_rating.to_d * 0.5.to_d,
   #     kicker_rating.to_d * 0.3.to_d,
   #     punter_rating.to_d * 0.2.to_d
-  #   ].sum.round(2)
+  #   ].sum
   # end
 end
