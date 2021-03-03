@@ -17,10 +17,8 @@ class Calculate::Fullback < Calculate::Position
   # Player(archetypes)
   # Prospect(archetypes)
   def calculate_rating
-    if @category == "player"
-      [receiving_rating.to_d, blocking_rating.to_d].sum.round(4)
-    elsif @category == "prospect"
-      [receiving_rating.to_d, blocking_rating.to_d].sum.floor
+    if @category.in?(["player", "prospect"])
+      ([receiving_rating, blocking_rating].sum.to_d / 2.to_d).floor
     end
   end
 

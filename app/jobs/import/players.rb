@@ -30,7 +30,7 @@ class Import::Players < ApplicationJob
       next unless row[:contractstatus] == "FreeAgent" || (row[:contractstatus] == "Signed" && row[:teamindex].to_i < 32)
 
       player_id += 1
-      next unless row[:position].in?(["QB","HB"])
+      next unless row[:position].in?(["QB","HB","FB"])
 
       player_archetypes = []
       cap_hit, cap_savings, cap_penalty = 0, 0, 0
@@ -61,12 +61,14 @@ class Import::Players < ApplicationJob
 
       (0..3).each do |index|
         next if row["overallgrade#{index}".to_sym].to_i.zero?
+        archetype_name = archetype_names[row[:position]][index]
+        next if archetype_name.nil?
 
         archetype_id += 1
         archetype = {
           id: archetype_id,
           player_id: player_id,
-          name: archetype_names[row[:position]][index],
+          name: archetype_name,
           overall_rating: row["overallgrade#{index}".to_sym].to_i,
         }
 

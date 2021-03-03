@@ -20,8 +20,8 @@ class Calculate::Position
     @role = {
       name: role_name,
       style: archetype[:name],
-      rating: calculate_rating,
-      value: calculate_value
+      rating: rating,
+      value: value
     }
   end
 

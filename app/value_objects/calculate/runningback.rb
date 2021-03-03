@@ -25,10 +25,8 @@ class Calculate::Runningback < Calculate::Position
   # Team:Rushing(players)
   # Team:Receiving(players)
   def calculate_rating
-    if @category == "player" || @category == "prospect"
-      [rushing_rating.to_d, receiving_rating.to_d].sum.round(4)
-    elsif @category == "prospect"
-      [rushing_rating.to_d, receiving_rating.to_d].sum.floor
+    if @category.in?(["player", "prospect"])
+      ([rushing_rating, receiving_rating].sum.to_d / 2.to_d).floor
     elsif @category == "rushing"
       rushing_rating
     elsif @category == "receiving"
@@ -58,5 +56,9 @@ class Calculate::Runningback < Calculate::Position
 
   def receiving_rating
     @receiving_rating ||= get_roles(1, "Receiving Back", "Utility")[:overall_rating]
+  end
+
+  def calculated_rating
+    ([rushing_rating, receiving_rating].sum.to_d / 2.to_d)
   end
 end
