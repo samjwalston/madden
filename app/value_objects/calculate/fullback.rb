@@ -1,7 +1,7 @@
 class Calculate::Fullback < Calculate::Position
   PLAYER_VALUE = 0.0095.to_d.freeze
-  PLAYER_RECEIVING_VALUE = 0.0053.to_d.freeze # 55.79%
-  PLAYER_BLOCKING_VALUE = 0.0042.to_d.freeze  # 44.21%
+  PLAYER_RECEIVING_VALUE = 0.0053.to_d.freeze
+  PLAYER_BLOCKING_VALUE = 0.0042.to_d.freeze
 
   PROSPECT_VALUE = 0.8211.to_d.freeze
   PROSPECT_RECEIVING_VALUE = 0.4581.to_d.freeze
@@ -18,7 +18,7 @@ class Calculate::Fullback < Calculate::Position
   # Prospect(archetypes)
   def calculate_rating
     if @category.in?(["player", "prospect"])
-      ([receiving_rating, blocking_rating].sum.to_d / 2.to_d).floor
+      calculated_rating.round
     end
   end
 
@@ -38,5 +38,9 @@ class Calculate::Fullback < Calculate::Position
 
   def blocking_rating
     @blocking_rating ||= get_roles(1, "Blocking")[:overall_rating]
+  end
+
+  def calculated_rating
+    [receiving_rating.to_d * 0.5579.to_d, blocking_rating.to_d * 0.4421.to_d].sum
   end
 end

@@ -1,7 +1,7 @@
 class Calculate::Runningback < Calculate::Position
   PLAYER_VALUE = 0.0227.to_d.freeze
-  PLAYER_RUSHING_VALUE = 0.0174.to_d.freeze   # 76.65%
-  PLAYER_RECEIVING_VALUE = 0.0053.to_d.freeze # 23.35%
+  PLAYER_RUSHING_VALUE = 0.0174.to_d.freeze
+  PLAYER_RECEIVING_VALUE = 0.0053.to_d.freeze
 
   PROSPECT_VALUE = 0.9568.to_d.freeze
   PROSPECT_RUSHING_VALUE = 0.7333.to_d.freeze
@@ -11,6 +11,10 @@ class Calculate::Runningback < Calculate::Position
   def rushing_style
     rushing_rating if @rushing_style.nil?
     @rushing_style
+  end
+
+  def rushing_scheme_bonus(base_rating, styles) # :TODO:
+    base_rating
   end
 
 
@@ -26,7 +30,7 @@ class Calculate::Runningback < Calculate::Position
   # Team:Receiving(players)
   def calculate_rating
     if @category.in?(["player", "prospect"])
-      ([rushing_rating, receiving_rating].sum.to_d / 2.to_d).floor
+      calculated_rating.round
     elsif @category == "rushing"
       rushing_rating
     elsif @category == "receiving"
@@ -59,6 +63,6 @@ class Calculate::Runningback < Calculate::Position
   end
 
   def calculated_rating
-    ([rushing_rating, receiving_rating].sum.to_d / 2.to_d)
+    [rushing_rating.to_d * 0.7665.to_d, receiving_rating.to_d * 0.2335.to_d].sum
   end
 end

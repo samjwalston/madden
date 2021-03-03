@@ -107,7 +107,7 @@ class Import::Teams < ApplicationJob
 
   def get_quarterback_rating(team_id)
     quaterbacks = get_players(team_id, "QB")
-    Calculate::Quarterback.new(players: quaterbacks).rating
+    Calculate::Quarterback.new(category: "passing", players: quaterbacks).rating
   end
 
   def get_rushing_rating(team_id, styles = [])
@@ -119,7 +119,7 @@ class Import::Teams < ApplicationJob
     # HB Rushing Rating Calculations
     runningback = Calculate::Runningback.new(category: "rushing", players: runningbacks)
     runningback_rating = runningback.rating
-    styles << (runningback.rushing_style == "Elusive Back" ? "Finesse" : "Power")
+    styles << runningback.rushing_style
 
     # IOL Rushing Rating Calculations
     # offensive_lineman = Calculate::InteriorOffensiveLine.call(interior_offensive_linemen)
@@ -143,20 +143,23 @@ class Import::Teams < ApplicationJob
     ].sum
 
     # Rushing Scheme Bonus
-    styles.uniq.size == 1 ? (rushing_rating * 1.03.to_d) : rushing_rating
+    runningback.rushing_scheme_bonus(rushing_rating)
   end
 
-  def get_receiving_rating(team_id)
-    # wide_receivers = get_players(team_id, "WR")
+  def get_receiving_rating(team_id, styles = [])
+    wide_receivers = get_players(team_id, "WR")
     # tight_ends = get_players(team_id, "TE")
     runningbacks = get_players(team_id, "HB", "FB")
 
     # WR Receiving Rating Calculations
-    # receiving_core = Calculate::WideReceiver.call(wide_receivers)
-    wide_receiver_rating = 0#receiving_core.team_value
+    receiving_core = Calculate::WideReceiver.call(category: "receiving", players: wide_receivers)
+    wide_receiver_rating = receiving_core.rating
+    styles += receiving_core.receiving_styles
 
     # TE Receiving Rating Calculations
-    tight_end_rating = 0#Calculate::TightEnd.call(tight_ends).team_value("receiving")
+    # tight_end = Calculate::TightEnd.call(tight_ends).team_value("receiving")
+    tight_end_rating = 0#tight_end.team_value
+    # styles << tight_end.receiving_style
 
     # HB/FB Receiving Rating Calculations
     runningback = Calculate::Runningback.new(category: "receiving", players: runningbacks)
@@ -170,8 +173,7 @@ class Import::Teams < ApplicationJob
     ].sum
 
     # Receiving Scheme Bonus
-    # receiving_core.scheme_fit_bonus(receiving_rating).round(2)
-    receiving_rating
+    receiving_core.receiving_scheme_bonus(receiving_rating)
   end
 
   # def get_passprotect_rating(team_id)
