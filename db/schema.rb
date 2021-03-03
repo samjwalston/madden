@@ -56,6 +56,7 @@ ActiveRecord::Schema.define(version: 2021_02_27_235406) do
     t.integer "contract_year"
     t.integer "contract_years_left"
     t.integer "overall_rating"
+    t.decimal "rating"
     t.decimal "value"
     t.money "cap_hit", scale: 2
     t.money "cap_savings", scale: 2

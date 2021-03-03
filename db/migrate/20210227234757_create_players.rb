@@ -19,6 +19,7 @@ class CreatePlayers < ActiveRecord::Migration[6.1]
       t.integer :contract_year
       t.integer :contract_years_left
       t.integer :overall_rating
+      t.decimal :rating
       t.decimal :value
       t.money :cap_hit
       t.money :cap_savings

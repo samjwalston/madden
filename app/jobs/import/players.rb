@@ -95,6 +95,7 @@ class Import::Players < ApplicationJob
         contract_year: (row[:contractyear].to_i + 1),
         contract_years_left: (row[:contractlength].to_i - row[:contractyear].to_i),
         overall_rating: row[:overallrating].to_i,
+        rating: role[:rating],
         value: role[:value],
         cap_hit: cap_hit,
         cap_savings: cap_savings,
@@ -114,8 +115,8 @@ class Import::Players < ApplicationJob
         role = Calculate::Quarterback.new(archetypes: archetypes).role
       elsif role_name == "HB"
         role = Calculate::Runningback.new(archetypes: archetypes).role
-      # elsif role_name == "FB"
-      #   roles << get_fullback_role(archetypes)
+      elsif role_name == "FB"
+        role = Calculate::Fullback.new(archetypes: archetypes).role
       # elsif role_name == "WR"
       #   roles << get_receiver_role(archetypes)
       # elsif role_name == "TE"

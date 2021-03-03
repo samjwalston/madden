@@ -9,6 +9,8 @@ class Calculate::Quarterback < Calculate::Position
     "QB"
   end
 
+  # Player(archetypes)
+  # Prospect(archetypes)
   # Team:Passing(players)
   def calculate_rating
     passing_rating
@@ -28,6 +30,6 @@ class Calculate::Quarterback < Calculate::Position
   end
 
   def passing_rating
-    get_roles(1)[:overall_rating]
+    @passing_rating ||= get_roles(1)[:overall_rating]
   end
 end
