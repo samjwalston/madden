@@ -133,12 +133,12 @@ class Import::Players < ApplicationJob
         role ||= Calculate::Linebacker.new(archetypes: archetypes).role
       elsif role_name == "CB"
         role = Calculate::Cornerback.new(archetypes: archetypes).role
-      # elsif role_name == "S"
-      #   role = Calculate::Safety.new(archetypes: archetypes).role
-      # elsif role_name == "K"
-      #   role = Calculate::Kicker.new(archetypes: archetypes).role
-      # elsif role_name == "P"
-      #   role = Calculate::Punter.new(archetypes: archetypes).role
+      elsif role_name == "S"
+        role = Calculate::Safety.new(archetypes: archetypes).role
+      elsif role_name == "K"
+        role = Calculate::Kicker.new(archetypes: archetypes).role
+      elsif role_name == "P"
+        role = Calculate::Punter.new(archetypes: archetypes).role
       end
     end
 

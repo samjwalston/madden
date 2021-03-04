@@ -33,7 +33,7 @@ class Import::Teams < ApplicationJob
 
       offense_rating = get_offense_rating(team_id, quarterback_rating, rushing_rating, receiving_rating, passprotect_rating)
       defense_rating = get_defense_rating(team_id, passrush_rating, rundefense_rating, passcoverage_rating)
-      specialteams_rating = 0#get_specialteams_rating(team_id)
+      specialteams_rating = get_specialteams_rating(team_id)
 
       overall_rating = [
         offense_rating.to_d * 0.58.to_d,
@@ -218,7 +218,7 @@ class Import::Teams < ApplicationJob
     edge_rushers = get_players(team_id, "ED")
     interior_rushers = get_players(team_id, "IDL")
     linebackers = get_players(team_id, "LB")
-    # safeties = get_players(team_id, "S")
+    safeties = get_players(team_id, "S")
 
     # IDL Run Defense Rating Calculations
     interior_defensive_line_rating = Calculate::InteriorDefensiveLine.new(category: "run_defense", players: interior_rushers).rating
@@ -230,7 +230,7 @@ class Import::Teams < ApplicationJob
     linebacker_rating = Calculate::Linebacker.new(category: "run_defense", players: linebackers).rating
 
     # S Run Defense Rating Calculations
-    safety_rating = 0#Calculate::Safety.new(category: "run_defense", players: safeties).rating
+    safety_rating = Calculate::Safety.new(category: "run_defense", players: safeties).rating
 
     # Final Run Defense Rating Calculations
     [
@@ -243,7 +243,7 @@ class Import::Teams < ApplicationJob
 
   def get_passcoverage_rating(team_id, styles = [])
     cornerbacks = get_players(team_id, "CB")
-    # safeties = get_players(team_id, "S")
+    safeties = get_players(team_id, "S")
     linebackers = get_players(team_id, "LB")
 
     # CB Coverage Rating Calculations
@@ -252,9 +252,9 @@ class Import::Teams < ApplicationJob
     styles += coverage_unit.coverage_styles
 
     # S Coverage Rating Calculations
-    # safety = Calculate::Safety.new(category: "coverage", players: safeties)
-    safety_rating = 0#safety.rating
-    # styles += safety.coverage_styles
+    safety = Calculate::Safety.new(category: "coverage", players: safeties)
+    safety_rating = safety.rating
+    styles += safety.coverage_styles
 
     # LB Coverage Rating Calculations
     linebacker_rating = Calculate::Linebacker.new(category: "coverage", players: linebackers).rating
@@ -293,22 +293,22 @@ class Import::Teams < ApplicationJob
     ].sum
   end
 
-  # def get_specialteams_rating(team_id)
-  #   coach_rating = Coach.select(:specialteams_rating).find_by(team_id: team_id).specialteams_rating
-  #   kickers = Player.includes(:role).where(team_id: team_id, position: "K", injury_status: "Uninjured")
-  #   punters = Player.includes(:role).where(team_id: team_id, position: "P", injury_status: "Uninjured")
-  #
-  #   # K Special Teams Rating Calculations
-  #   kicker_rating = Calculate::Kicker.call(kickers).team_value
-  #
-  #   # P Special Teams Rating Calculations
-  #   punter_rating = Calculate::Punter.call(punters).team_value
-  #
-  #   # Final Special Teams Rating Calculations
-  #   [
-  #     coach_rating.to_d * 0.5.to_d,
-  #     kicker_rating.to_d * 0.3.to_d,
-  #     punter_rating.to_d * 0.2.to_d
-  #   ].sum
-  # end
+  def get_specialteams_rating(team_id)
+    coach_rating = Coach.select(:specialteams_rating).find_by(team_id: team_id).specialteams_rating
+    kickers = get_players(team_id, "K")
+    punters = get_players(team_id, "P")
+
+    # K Special Teams Rating Calculations
+    kicker_rating = Calculate::Kicker.new(category: "kicking", players: kickers).rating
+
+    # P Special Teams Rating Calculations
+    punter_rating = Calculate::Punter.new(category: "kicking", players: kickers).rating
+
+    # Final Special Teams Rating Calculations
+    [
+      coach_rating.to_d * 0.5.to_d,
+      kicker_rating.to_d * 0.3.to_d,
+      punter_rating.to_d * 0.2.to_d
+    ].sum
+  end
 end
