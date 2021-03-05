@@ -27,7 +27,7 @@ class Calculate::Punter < Calculate::Position
     if @category == "player"
       (kicking_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (kicking_rating * PROSPECT_VALUE).round(4)
+      (kicking_rating * PROSPECT_VALUE)
     elsif @category == "free_agency"
       (kicking_rating * PLAYER_VALUE).round(2).to_f
     end

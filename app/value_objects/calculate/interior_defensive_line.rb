@@ -34,7 +34,7 @@ class Calculate::InteriorDefensiveLine < Calculate::Position
     if @category == "player"
       (total_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (total_rating * PROSPECT_VALUE).round(4)
+      (total_rating * PROSPECT_VALUE)
     elsif @category == "free_agency"
       (total_rating(2) * (PLAYER_VALUE * 2)).round(2).to_f
     end

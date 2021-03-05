@@ -41,7 +41,7 @@ class Calculate::Cornerback < Calculate::Position
     if @category == "player"
       (coverage_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (coverage_rating * PROSPECT_VALUE).round(4)
+      (coverage_rating * PROSPECT_VALUE)
     elsif @category == "free_agency"
       (coverage_rating(3) * (PLAYER_VALUE * 3)).round(2).to_f
     end

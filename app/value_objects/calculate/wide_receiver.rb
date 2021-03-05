@@ -41,7 +41,7 @@ class Calculate::WideReceiver < Calculate::Position
     if @category == "player"
       (receiving_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (receiving_rating * PROSPECT_VALUE).round(4)
+      (receiving_rating * PROSPECT_VALUE)
     elsif @category == "free_agency"
       (receiving_rating(3) * (PLAYER_VALUE * 3)).round(2).to_f
     end

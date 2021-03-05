@@ -1,8 +1,5 @@
-class Import::Teams < ApplicationJob
-  require 'csv'
-
-
-  def perform_now
+class Import::Teams < Import::Job
+  def perform
     teams = get_values
 
     Team.delete_all

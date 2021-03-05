@@ -27,7 +27,7 @@ class Calculate::Quarterback < Calculate::Position
     if @category == "player"
       (passing_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (passing_rating * PROSPECT_VALUE).round(4)
+      (passing_rating * PROSPECT_VALUE)
     elsif @category == "free_agency"
       (passing_rating * PLAYER_VALUE).round(2).to_f
     end

@@ -1,7 +1,4 @@
-class Import::Players < ApplicationJob
-  require 'csv'
-
-
+class Import::Players < Import::Job
   def perform
     players, contracts, archetypes = get_values
 
@@ -58,7 +55,8 @@ class Import::Players < ApplicationJob
       end
 
       (0..3).each do |index|
-        next if row["overallgrade#{index}".to_sym].to_i.zero?
+        rating = row["overallgrade#{index}".to_sym].to_i
+        next if rating.zero?
         archetype_name = archetype_names[row[:position]][index]
         next if archetype_name.nil?
 
@@ -67,7 +65,7 @@ class Import::Players < ApplicationJob
           id: archetype_id,
           player_id: player_id,
           name: archetype_name,
-          overall_rating: row["overallgrade#{index}".to_sym].to_i,
+          overall_rating: rating.to_i,
         }
 
         player_archetypes << archetype
@@ -104,44 +102,5 @@ class Import::Players < ApplicationJob
     end
 
     [players, contracts, archetypes]
-  end
-
-  def get_role(position, weight, archetypes) # :TODO:
-    role_names = (get_role_names[position] || [position])
-    role = nil
-
-    role_names.each do |role_name|
-      if role_name == "QB"
-        role = Calculate::Quarterback.new(archetypes: archetypes).role
-      elsif role_name == "HB"
-        role = Calculate::Runningback.new(archetypes: archetypes).role
-      elsif role_name == "FB"
-        role = Calculate::Fullback.new(archetypes: archetypes).role
-      elsif role_name == "WR"
-        role = Calculate::WideReceiver.new(archetypes: archetypes).role
-      elsif role_name == "TE"
-        role = Calculate::TightEnd.new(archetypes: archetypes).role
-      elsif role_name == "OT"
-        role = Calculate::OffensiveTackle.new(archetypes: archetypes).role
-      elsif role_name == "IOL"
-        role = Calculate::InteriorOffensiveLine.new(archetypes: archetypes).role
-      elsif role_name == "ED" && weight < 120
-        role = Calculate::Edge.new(archetypes: archetypes).role
-      elsif role_name == "IDL"
-        role ||= Calculate::InteriorDefensiveLine.new(archetypes: archetypes).role
-      elsif role_name == "LB"
-        role ||= Calculate::Linebacker.new(archetypes: archetypes).role
-      elsif role_name == "CB"
-        role = Calculate::Cornerback.new(archetypes: archetypes).role
-      elsif role_name == "S"
-        role = Calculate::Safety.new(archetypes: archetypes).role
-      elsif role_name == "K"
-        role = Calculate::Kicker.new(archetypes: archetypes).role
-      elsif role_name == "P"
-        role = Calculate::Punter.new(archetypes: archetypes).role
-      end
-    end
-
-    (role || {})
   end
 end

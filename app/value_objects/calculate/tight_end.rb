@@ -40,7 +40,7 @@ class Calculate::TightEnd < Calculate::Position
     if @category == "player"
       (total_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (total_rating * PROSPECT_VALUE).round(4)
+      (total_rating * PROSPECT_VALUE)
     elsif @category == "free_agency"
       (total_rating * PLAYER_VALUE).round(2).to_f
     end

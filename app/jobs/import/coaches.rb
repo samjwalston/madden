@@ -1,7 +1,4 @@
-class Import::Coaches < ApplicationJob
-  require 'csv'
-
-
+class Import::Coaches < Import::Job
   def perform
     coaches = get_values
 
@@ -15,7 +12,7 @@ class Import::Coaches < ApplicationJob
   private
 
   def get_values
-    records = []
+    coaches = []
     coach_id = 0
 
     CSV.foreach(Rails.root.join("coaches.csv"), headers: true, header_converters: :symbol) do |row|
@@ -32,7 +29,7 @@ class Import::Coaches < ApplicationJob
         specialteams_rating.to_d * 0.07.to_d
       ].sum.round(2)
 
-      records << {
+      coaches << {
         id: coach_id,
         team_id: row[:contractlength].to_i.zero? ? nil : (row[:teamindex].to_i + 1),
         name: [row[:firstname], row[:lastname]].compact.join(" "),
@@ -43,6 +40,6 @@ class Import::Coaches < ApplicationJob
       }
     end
 
-    records
+    coaches
   end
 end
