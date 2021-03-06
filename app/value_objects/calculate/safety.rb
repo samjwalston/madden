@@ -1,6 +1,6 @@
 class Calculate::Safety < Calculate::Position
-  PLAYER_VALUE = 0.0237.to_d.freeze
-  PROSPECT_VALUE = 0.9593.to_d.freeze
+  PLAYER_VALUE = 0.0293.to_d.freeze
+  PROSPECT_VALUE = 0.9732.to_d.freeze
 
 
   def coverage_styles
@@ -29,7 +29,7 @@ class Calculate::Safety < Calculate::Position
     elsif @category == "coverage"
       coverage_rating(2)
     elsif @category == "run_defense"
-      run_defense_rating
+      run_defense_rating(2)
     end
   end
 
@@ -62,11 +62,20 @@ class Calculate::Safety < Calculate::Position
     end
   end
 
-  def run_defense_rating
-    @run_defense_rating ||= get_roles(1, "Run Support")[:overall_rating]
+  def run_defense_rating(player_count = 1)
+    @run_defense_rating unless @run_defense_rating.nil?
+    archetypes = get_roles(player_count, "Run Support")
+
+    if player_count == 1
+      @run_defense_rating = archetypes[:overall_rating]
+    else
+      @run_defense_rating = (archetypes.map do |archetype|
+        archetype[:overall_rating]
+      end.sum / player_count.to_d)
+    end
   end
 
   def total_rating(player_count = 1)
-    [coverage_rating(player_count).to_d * 0.8842.to_d, run_defense_rating.to_d * 0.1158.to_d].sum
+    [coverage_rating(player_count).to_d * 0.8191.to_d, run_defense_rating(player_count).to_d * 0.1809.to_d].sum
   end
 end

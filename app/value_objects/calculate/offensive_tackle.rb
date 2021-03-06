@@ -1,6 +1,6 @@
 class Calculate::OffensiveTackle < Calculate::Position
-  PLAYER_VALUE = 0.0311.to_d.freeze
-  PROSPECT_VALUE = 0.9778.to_d.freeze
+  PLAYER_VALUE = 0.0305.to_d.freeze
+  PROSPECT_VALUE = 0.9762.to_d.freeze
 
 
   def run_blocking_styles
@@ -76,6 +76,6 @@ class Calculate::OffensiveTackle < Calculate::Position
   end
 
   def total_rating(player_count = 1)
-    [pass_blocking_rating(player_count).to_d * 0.7331.to_d, run_blocking_rating(player_count).to_d * 0.2669.to_d].sum
+    [pass_blocking_rating(player_count).to_d * 0.6623.to_d, run_blocking_rating(player_count).to_d * 0.3377.to_d].sum
   end
 end

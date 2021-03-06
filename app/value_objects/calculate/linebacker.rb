@@ -1,6 +1,6 @@
 class Calculate::Linebacker < Calculate::Position
-  PLAYER_VALUE = 0.024.to_d.freeze
-  PROSPECT_VALUE = 0.96.to_d.freeze
+  PLAYER_VALUE = 0.0261.to_d.freeze
+  PROSPECT_VALUE = 0.9652.to_d.freeze
 
 
   private
@@ -67,6 +67,6 @@ class Calculate::Linebacker < Calculate::Position
   end
 
   def total_rating(player_count = 1)
-    [coverage_rating(player_count).to_d * 0.6962.to_d, run_defense_rating(player_count).to_d * 0.3038.to_d].sum
+    [coverage_rating(player_count).to_d * 0.5939.to_d, run_defense_rating(player_count).to_d * 0.4061.to_d].sum
   end
 end

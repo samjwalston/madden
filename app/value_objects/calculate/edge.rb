@@ -1,6 +1,6 @@
 class Calculate::Edge < Calculate::Position
-  PLAYER_VALUE = 0.031.to_d.freeze
-  PROSPECT_VALUE = 0.9775.to_d.freeze
+  PLAYER_VALUE = 0.0305.to_d.freeze
+  PROSPECT_VALUE = 0.9762.to_d.freeze
 
 
   def role
@@ -76,6 +76,6 @@ class Calculate::Edge < Calculate::Position
   end
 
   def total_rating(player_count = 1)
-    [pass_rush_rating(player_count).to_d * 0.8824.to_d, run_defense_rating(player_count).to_d * 0.1176.to_d].sum
+    [pass_rush_rating(player_count).to_d * 0.7508.to_d, run_defense_rating(player_count).to_d * 0.2492.to_d].sum
   end
 end

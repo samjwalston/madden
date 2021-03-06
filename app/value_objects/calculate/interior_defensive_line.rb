@@ -1,6 +1,6 @@
 class Calculate::InteriorDefensiveLine < Calculate::Position
-  PLAYER_VALUE = 0.0273.to_d.freeze
-  PROSPECT_VALUE = 0.9683.to_d.freeze
+  PLAYER_VALUE = 0.0291.to_d.freeze
+  PROSPECT_VALUE = 0.9727.to_d.freeze
 
 
   private
@@ -67,6 +67,6 @@ class Calculate::InteriorDefensiveLine < Calculate::Position
   end
 
   def total_rating(player_count = 1)
-    [pass_rush_rating(player_count).to_d * 0.6667.to_d, run_defense_rating(player_count).to_d * 0.3333.to_d].sum
+    [pass_rush_rating(player_count).to_d * 0.5258.to_d, run_defense_rating(player_count).to_d * 0.4742.to_d].sum
   end
 end

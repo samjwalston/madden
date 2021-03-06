@@ -44,7 +44,7 @@ class Import::Prospects < Import::Job
       end
 
       role = get_role(row[:position], row[:weight].to_i, prospect_archetypes)
-      value = get_value(role[:value])
+      value = get_base_value(role[:value])
       age = row[:age].to_i
 
       if age == 20
@@ -78,7 +78,7 @@ class Import::Prospects < Import::Job
         position: row[:position],
         role: role[:name],
         style: role[:style],
-        value: (value / 12.to_d).round(3),
+        value: [8, (value / 11.to_d)].min].round(3),
         grade: get_letter_grade(role[:rating].floor),
         draft_round: row[:plyr_draftround].to_i > 7 ? nil : row[:plyr_draftround].to_i,
         draft_pick: row[:plyr_draftround].to_i > 7 ? nil : row[:plyr_draftpick].to_i,
@@ -89,7 +89,7 @@ class Import::Prospects < Import::Job
     [prospects, archetypes]
   end
 
-  def get_value(value)
-    value * (1 + ((value.to_d - 70.to_d) * 0.01.to_d))
+  def get_base_value(value)
+    value * (1 + ((value.floor - 70.to_d) * 0.01.to_d))
   end
 end

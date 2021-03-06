@@ -9,10 +9,9 @@ class CreateTeams < ActiveRecord::Migration[6.1]
       t.decimal :offense_rating
       t.decimal :defense_rating
       t.decimal :specialteams_rating
-      t.decimal :quarterback_rating
+      t.decimal :passing_rating
       t.decimal :rushing_rating
-      t.decimal :receiver_rating
-      t.decimal :passprotect_rating
+      t.decimal :receiving_rating
       t.decimal :passrush_rating
       t.decimal :rundefense_rating
       t.decimal :passcoverage_rating

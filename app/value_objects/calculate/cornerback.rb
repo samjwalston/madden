@@ -1,6 +1,6 @@
 class Calculate::Cornerback < Calculate::Position
-  PLAYER_VALUE = 0.0307.to_d.freeze
-  PROSPECT_VALUE = 0.9768.to_d.freeze
+  PLAYER_VALUE = 0.0309.to_d.freeze
+  PROSPECT_VALUE = 0.9772.to_d.freeze
 
 
   def coverage_styles

@@ -1,6 +1,6 @@
 class Calculate::Fullback < Calculate::Position
-  PLAYER_VALUE = 0.0095.to_d.freeze
-  PROSPECT_VALUE = 0.8422.to_d.freeze
+  PLAYER_VALUE = 0.0162.to_d.freeze
+  PROSPECT_VALUE = 0.881.to_d.freeze
 
 
   private
@@ -40,6 +40,6 @@ class Calculate::Fullback < Calculate::Position
   end
 
   def total_rating
-    [receiving_rating.to_d * 0.5579.to_d, blocking_rating.to_d * 0.4421.to_d].sum
+    [receiving_rating.to_d * 0.5.to_d, blocking_rating.to_d * 0.5.to_d].sum
   end
 end

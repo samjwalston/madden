@@ -1,6 +1,6 @@
 class Calculate::Runningback < Calculate::Position
-  PLAYER_VALUE = 0.0227.to_d.freeze
-  PROSPECT_VALUE = 0.9568.to_d.freeze
+  PLAYER_VALUE = 0.0245.to_d.freeze
+  PROSPECT_VALUE = 0.9612.to_d.freeze
 
 
   def rushing_style
@@ -62,6 +62,6 @@ class Calculate::Runningback < Calculate::Position
   end
 
   def total_rating
-    [rushing_rating.to_d * 0.7665.to_d, receiving_rating.to_d * 0.2335.to_d].sum
+    [rushing_rating.to_d * 0.6457.to_d, receiving_rating.to_d * 0.3543.to_d].sum
   end
 end

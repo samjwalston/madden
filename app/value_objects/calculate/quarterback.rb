@@ -1,5 +1,5 @@
 class Calculate::Quarterback < Calculate::Position
-  PLAYER_VALUE = 0.2204.to_d.freeze
+  PLAYER_VALUE = 0.2104.to_d.freeze
   PROSPECT_VALUE = 1.to_d.freeze
 
 

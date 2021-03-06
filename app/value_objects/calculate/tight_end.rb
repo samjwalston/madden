@@ -1,6 +1,6 @@
 class Calculate::TightEnd < Calculate::Position
-  PLAYER_VALUE = 0.0298.to_d.freeze
-  PROSPECT_VALUE = 0.9745.to_d.freeze
+  PLAYER_VALUE = 0.0289.to_d.freeze
+  PROSPECT_VALUE = 0.9722.to_d.freeze
 
 
   def receiving_style
@@ -58,6 +58,6 @@ class Calculate::TightEnd < Calculate::Position
   end
 
   def total_rating
-    [receiving_rating.to_d * 0.8054.to_d, blocking_rating.to_d * 0.1946.to_d].sum
+    [receiving_rating.to_d * 0.7197.to_d, blocking_rating.to_d * 0.2803.to_d].sum
   end
 end

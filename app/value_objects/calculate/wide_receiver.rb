@@ -1,6 +1,6 @@
 class Calculate::WideReceiver < Calculate::Position
-  PLAYER_VALUE = 0.0347.to_d.freeze
-  PROSPECT_VALUE = 0.9868.to_d.freeze
+  PLAYER_VALUE = 0.03.to_d.freeze
+  PROSPECT_VALUE = 0.975.to_d.freeze
 
 
   def receiving_styles
