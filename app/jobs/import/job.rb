@@ -1,7 +1,4 @@
 class Import::Job < ApplicationJob
-  require 'csv'
-
-
   private
 
   def get_role(position, weight, archetypes)
