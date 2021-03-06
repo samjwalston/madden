@@ -120,7 +120,7 @@ class Import::Teams < Import::Job
 
     # Final Passing Rating Calculations
     [
-      quarterback_rating * 0.73.to_d
+      quarterback_rating * 0.73.to_d,
       offensive_tackle_rating * 0.14.to_d,
       interior_offensive_line_rating * 0.12.to_d,
       blocker_rating * 0.01.to_d
