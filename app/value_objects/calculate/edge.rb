@@ -7,6 +7,21 @@ class Calculate::Edge < Calculate::Position
     run_defense_rating > pass_rush_rating || coverage_rating > pass_rush_rating ? nil : super
   end
 
+  def pass_rush_styles
+    pass_rush_rating(2) if @pass_rush_styles.nil?
+    @pass_rush_styles
+  end
+
+  def pass_rush_scheme_bonus(base_rating, styles)
+    styles = styles.sort
+
+    if styles == ["Power Rusher", "Power Rusher", "Speed Rusher", "Speed Rusher"]
+      base_rating * 1.03.to_d
+    else
+      base_rating
+    end
+  end
+
 
   private
 
@@ -47,12 +62,15 @@ class Calculate::Edge < Calculate::Position
 
   def pass_rush_rating(player_count = 1)
     @pass_rush_rating unless @pass_rush_rating.nil?
+    @pass_rush_styles = []
     archetypes = get_roles(player_count, "Power Rusher", "Speed Rusher")
 
     if player_count == 1
+      @pass_rush_styles << archetypes[:name]
       @pass_rush_rating = archetypes[:overall_rating]
     else
       @pass_rush_rating = (archetypes.map do |archetype|
+        @pass_rush_styles << archetype[:name]
         archetype[:overall_rating]
       end.sum / player_count.to_d)
     end

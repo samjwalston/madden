@@ -8,8 +8,16 @@ class Calculate::Cornerback < Calculate::Position
     @coverage_styles
   end
 
-  def coverage_scheme_bonus(base_rating, styles) # :TODO:
-    base_rating
+  def coverage_scheme_bonus(base_rating, styles)
+    styles = styles.sort
+
+    if styles == ["Hybrid", "Man to Man", "Man to Man", "Slot", "Zone"]
+      base_rating * 1.03.to_d
+    elsif styles == ["Hybrid", "Slot", "Zone", "Zone", "Zone"]
+      base_rating * 1.03.to_d
+    else
+      base_rating
+    end
   end
 
 

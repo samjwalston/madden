@@ -192,21 +192,28 @@ class Import::Teams < Import::Job
     receiving_core.receiving_scheme_bonus(receiving_rating, styles)
   end
 
-  def get_passrush_rating(team_id)
+  def get_passrush_rating(team_id, styles = [])
     edge_rushers = get_players(team_id, "ED")
     interior_rushers = get_players(team_id, "IDL")
 
     # ED Pass Rushing Rating Calculations
-    edge_rush_rating = Calculate::Edge.new(category: "pass_rush", players: edge_rushers).rating
+    edge_rusher = Calculate::Edge.new(category: "pass_rush", players: edge_rushers)
+    edge_rush_rating = edge_rusher.rating
+    styles += edge_rusher.pass_rush_styles
 
     # IDL Pass Rushing Rating Calculations
-    interior_rush_rating = Calculate::InteriorDefensiveLine.new(category: "pass_rush", players: interior_rushers).rating
+    interior_rusher = Calculate::InteriorDefensiveLine.new(category: "pass_rush", players: interior_rushers)
+    interior_rush_rating = interior_rusher.rating
+    styles += interior_rusher.pass_rush_styles
 
     # Final Pass Rushing Rating Calculations
-    [
+    pass_rush_rating = [
       edge_rush_rating * 0.6.to_d,
       interior_rush_rating * 0.4.to_d
     ].sum
+
+    # Pass Rush Scheme Bonus
+    edge_rusher.pass_rush_scheme_bonus(pass_rush_rating, styles)
   end
 
   def get_rundefense_rating(team_id)

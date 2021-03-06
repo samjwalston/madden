@@ -8,8 +8,14 @@ class Calculate::Runningback < Calculate::Position
     @rushing_style
   end
 
-  def rushing_scheme_bonus(base_rating, styles) # :TODO:
-    base_rating
+  def rushing_scheme_bonus(base_rating, styles)
+    categories = format_styles(styles)
+
+    if categories.size == 1
+      base_rating * 1.03.to_d
+    else
+      base_rating
+    end
   end
 
 
@@ -63,5 +69,15 @@ class Calculate::Runningback < Calculate::Position
 
   def total_rating
     [rushing_rating.to_d * 0.6457.to_d, receiving_rating.to_d * 0.3543.to_d].sum
+  end
+
+  def format_styles(styles)
+    styles.map do |s|
+      if s.in?(["Power", "Power Back"])
+        0
+      elsif s.in?(["Agile", "Elusive Back"])
+        1
+      end
+    end.uniq
   end
 end

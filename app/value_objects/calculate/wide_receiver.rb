@@ -8,8 +8,16 @@ class Calculate::WideReceiver < Calculate::Position
     @receiving_styles
   end
 
-  def receiving_scheme_bonus(base_rating, styles) # :TODO:
-    base_rating
+  def receiving_scheme_bonus(base_rating, styles)
+    categories = format_styles(styles)
+
+    if categories.size == 3
+      base_rating * 1.03.to_d
+    elsif categories.size == 2
+      base_rating * 1.01.to_d
+    else
+      base_rating
+    end
   end
 
 
@@ -61,5 +69,17 @@ class Calculate::WideReceiver < Calculate::Position
         archetype[:overall_rating]
       end.sum / player_count.to_d)
     end
+  end
+
+  def format_styles(styles)
+    styles.map do |s|
+      if s.in?(["Router Runner", "Physical", "Vertical Threat"])
+        0
+      elsif s.in?(["Slot", "Possession"])
+        1
+      elsif s.in?(["Deep Threat"])
+        2
+      end
+    end.uniq
   end
 end

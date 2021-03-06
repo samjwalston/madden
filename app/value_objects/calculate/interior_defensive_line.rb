@@ -3,6 +3,12 @@ class Calculate::InteriorDefensiveLine < Calculate::Position
   PROSPECT_VALUE = 0.9727.to_d.freeze
 
 
+  def pass_rush_styles
+    pass_rush_rating(2) if @pass_rush_styles.nil?
+    @pass_rush_styles
+  end
+
+
   private
 
   def role_name
@@ -42,12 +48,15 @@ class Calculate::InteriorDefensiveLine < Calculate::Position
 
   def pass_rush_rating(player_count = 1)
     @pass_rush_rating unless @pass_rush_rating.nil?
+    @pass_rush_styles = []
     archetypes = get_roles(player_count, "Power Rusher", "Speed Rusher")
 
     if player_count == 1
+      @pass_rush_styles << archetypes[:name]
       @pass_rush_rating = archetypes[:overall_rating]
     else
       @pass_rush_rating = (archetypes.map do |archetype|
+        @pass_rush_styles << archetype[:name]
         archetype[:overall_rating]
       end.sum / player_count.to_d)
     end
