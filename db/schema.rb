@@ -65,6 +65,7 @@ ActiveRecord::Schema.define(version: 2021_02_27_235406) do
 
   create_table "prospect_archetypes", force: :cascade do |t|
     t.bigint "prospect_id"
+    t.integer "rating"
     t.string "name"
     t.string "grade"
   end

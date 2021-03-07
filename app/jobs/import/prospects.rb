@@ -31,12 +31,15 @@ class Import::Prospects < Import::Job
         archetype_name = archetype_names[row[:position]][index]
         next if archetype_name.nil?
 
+        grade = get_letter_grade(rating)
+
         archetype_id += 1
         archetype = {
           id: archetype_id,
           prospect_id: prospect_id,
+          rating: get_grade_rating(grade),
           name: archetype_name,
-          grade: get_letter_grade(rating),
+          grade: grade,
         }
 
         prospect_archetypes << archetype
@@ -91,5 +94,9 @@ class Import::Prospects < Import::Job
 
   def get_base_value(value)
     value * (1 + ((value.floor - 70.to_d) * 0.01.to_d))
+  end
+
+  def get_grade_rating(grade)
+    ["F","D","D+","C-","C","C+","B-","B","B+","A-","A","A+"].index(grade)
   end
 end
