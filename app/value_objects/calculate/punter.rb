@@ -1,6 +1,6 @@
 class Calculate::Punter < Calculate::Position
   PLAYER_VALUE = 0.01.to_d.freeze
-  PROSPECT_VALUE = 0.85.to_d.freeze
+  PROSPECT_VALUE = 0.8.to_d.freeze
 
 
   private

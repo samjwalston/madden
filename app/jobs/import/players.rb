@@ -39,7 +39,7 @@ class Import::Players < Import::Job
 
         if row[:contractyear].to_i == index
           cap_hit = (salary + bonus)
-          cap_savings = (salary - bonus)
+          cap_savings = (cap_hit - bonus)
         elsif row[:contractyear].to_i < index
           cap_penalty += bonus
         end

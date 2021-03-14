@@ -53,13 +53,13 @@ class Export::DraftClass < ApplicationJob
 
   def get_details(index, position)
     klass = "Create::#{NAMES[position]}".safe_constantize
-    klass.call(index).merge({"IDX": index})
+    klass.new.call(index).merge({"IDX": index})
   end
 
   def update_csv(year, picks, index = nil, data = [])
     dev_traits = [0,0,0,0]
 
-    CSV.foreach(Rails.root.join("draft.csv"), {headers: true, header_converters: :symbol}) do |row|
+    CSV.foreach(Rails.root.join("draft.csv"), headers: true, header_converters: :symbol) do |row|
       next if row[:ppos].blank?
 
       pick = picks.detect.with_index do |p,i|
@@ -231,19 +231,19 @@ class Export::DraftClass < ApplicationJob
 
   VALUES = {
     "QB":   1,
-    "HB":   0.9727,
-    "FB":   0.72,
-    "WR":   0.9847,
-    "TE":   0.9798,
-    "OT":   0.9811,
-    "IOL":  0.9718,
-    "EDGE": 0.9837,
-    "IDL":  0.9746,
-    "LB":   0.974,
-    "CB":   0.9807,
-    "S":    0.9737,
-    "K":    0.73,
-    "P":    0.71,
+    "HB":   0.9612,
+    "FB":   0.8,
+    "WR":   0.975,
+    "TE":   0.9722,
+    "OT":   0.9762,
+    "IOL":  0.9655,
+    "EDGE": 0.9762,
+    "IDL":  0.9727,
+    "LB":   0.9652,
+    "CB":   0.9772,
+    "S":    0.9732,
+    "K":    0.8,
+    "P":    0.8,
   }.freeze
 
   KEYS = {

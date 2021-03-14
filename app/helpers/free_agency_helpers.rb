@@ -43,7 +43,7 @@ module FreeAgencyHelpers
     Calculate::Safety.new(category: "free_agency", players: get_players(names, "FS", "SS")).value
   end
 
-  def player_trade_value(position, rating, age)
+  def player_trade_value(position, age, rating)
     positions = {"QB": 8,"CB": 4,"OT": 4,"ED": 4,"WR": 4,"S": 3,"IDL": 3,"TE": 3,"IOL": 2,"LB": 2,"HB": 2}.map{|k,v| [k.to_s,v.to_d]}.to_h
     ratings = [-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5,1.7,1.9,2.1,2.3,2.5,2.8,3.1,3.4,3.7].map(&:to_d)
     ages = [1.25,1,0.83,0.67,0.5,0.33,0.17,0,-0.17,-0.33,-0.5,-0.6,-0.7,-0.8,-0.9,-1,-1.05,-1.1,-1.15,-1.2,-1.25].map(&:to_d)

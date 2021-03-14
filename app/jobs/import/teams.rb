@@ -273,7 +273,7 @@ class Import::Teams < Import::Job
   end
 
   def get_offense_rating(team_id, passing_rating, rushing_rating, receiving_rating)
-    coach_rating = Coach.select(:offense_rating).find_by(team_id: team_id).offense_rating
+    coach_rating = Coach.select(:offense_rating).find_by(team_id: team_id).offense_rating rescue 0
 
     # Final Offense Rating Calculations
     [
@@ -285,7 +285,7 @@ class Import::Teams < Import::Job
   end
 
   def get_defense_rating(team_id, passrush_rating, rundefense_rating, passcoverage_rating)
-    coach_rating = Coach.select(:defense_rating).find_by(team_id: team_id).defense_rating
+    coach_rating = Coach.select(:defense_rating).find_by(team_id: team_id).defense_rating rescue 0
 
     # Final Defense Rating Calculations
     [
@@ -297,7 +297,7 @@ class Import::Teams < Import::Job
   end
 
   def get_specialteams_rating(team_id)
-    coach_rating = Coach.select(:specialteams_rating).find_by(team_id: team_id).specialteams_rating
+    coach_rating = Coach.select(:specialteams_rating).find_by(team_id: team_id).specialteams_rating rescue 0
     kickers = get_players(team_id, "K")
     punters = get_players(team_id, "P")
 

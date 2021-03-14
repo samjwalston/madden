@@ -1,39 +1,39 @@
 class Import::Job < ApplicationJob
   private
 
-  def get_role(position, weight, archetypes)
+  def get_role(position, weight, archetypes, category = "player")
     role_names = (get_role_names[position] || [position])
     role = nil
 
     role_names.each do |role_name|
       if role_name == "QB"
-        role = Calculate::Quarterback.new(archetypes: archetypes).role
+        role = Calculate::Quarterback.new(category: category, archetypes: archetypes).role
       elsif role_name == "HB"
-        role = Calculate::Runningback.new(archetypes: archetypes).role
+        role = Calculate::Runningback.new(category: category, archetypes: archetypes).role
       elsif role_name == "FB"
-        role = Calculate::Fullback.new(archetypes: archetypes).role
+        role = Calculate::Fullback.new(category: category, archetypes: archetypes).role
       elsif role_name == "WR"
-        role = Calculate::WideReceiver.new(archetypes: archetypes).role
+        role = Calculate::WideReceiver.new(category: category, archetypes: archetypes).role
       elsif role_name == "TE"
-        role = Calculate::TightEnd.new(archetypes: archetypes).role
+        role = Calculate::TightEnd.new(category: category, archetypes: archetypes).role
       elsif role_name == "OT"
-        role = Calculate::OffensiveTackle.new(archetypes: archetypes).role
+        role = Calculate::OffensiveTackle.new(category: category, archetypes: archetypes).role
       elsif role_name == "IOL"
-        role = Calculate::InteriorOffensiveLine.new(archetypes: archetypes).role
+        role = Calculate::InteriorOffensiveLine.new(category: category, archetypes: archetypes).role
       elsif role_name == "ED" && weight < 120
-        role = Calculate::Edge.new(archetypes: archetypes).role
+        role = Calculate::Edge.new(category: category, archetypes: archetypes).role
       elsif role_name == "IDL"
-        role ||= Calculate::InteriorDefensiveLine.new(archetypes: archetypes).role
+        role ||= Calculate::InteriorDefensiveLine.new(category: category, archetypes: archetypes).role
       elsif role_name == "LB"
-        role ||= Calculate::Linebacker.new(archetypes: archetypes).role
+        role ||= Calculate::Linebacker.new(category: category, archetypes: archetypes).role
       elsif role_name == "CB"
-        role = Calculate::Cornerback.new(archetypes: archetypes).role
+        role = Calculate::Cornerback.new(category: category, archetypes: archetypes).role
       elsif role_name == "S"
-        role = Calculate::Safety.new(archetypes: archetypes).role
+        role = Calculate::Safety.new(category: category, archetypes: archetypes).role
       elsif role_name == "K"
-        role = Calculate::Kicker.new(archetypes: archetypes).role
+        role = Calculate::Kicker.new(category: category, archetypes: archetypes).role
       elsif role_name == "P"
-        role = Calculate::Punter.new(archetypes: archetypes).role
+        role = Calculate::Punter.new(category: category, archetypes: archetypes).role
       end
     end
 

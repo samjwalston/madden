@@ -1,6 +1,6 @@
 class Calculate::Kicker < Calculate::Position
   PLAYER_VALUE = 0.02.to_d.freeze
-  PROSPECT_VALUE = 0.9.to_d.freeze
+  PROSPECT_VALUE = 0.8.to_d.freeze
 
 
   private

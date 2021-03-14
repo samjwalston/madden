@@ -5,6 +5,12 @@ class Import::Prospects < Import::Job
     Prospect.delete_all
     Prospect.insert_all(prospects)
 
+
+    archetypes.map do |archetype|
+      archetype.delete(:overall_rating)
+      archetype
+    end
+
     ProspectArchetype.delete_all
     ProspectArchetype.insert_all(archetypes)
 
@@ -37,6 +43,7 @@ class Import::Prospects < Import::Job
         archetype = {
           id: archetype_id,
           prospect_id: prospect_id,
+          overall_rating: rating,
           rating: get_grade_rating(grade),
           name: archetype_name,
           grade: grade,
@@ -46,7 +53,7 @@ class Import::Prospects < Import::Job
         archetypes << archetype
       end
 
-      role = get_role(row[:position], row[:weight].to_i, prospect_archetypes)
+      role = get_role(row[:position], row[:weight].to_i, prospect_archetypes, "prospect")
       value = get_base_value(role[:value])
       age = row[:age].to_i
 
@@ -81,7 +88,7 @@ class Import::Prospects < Import::Job
         position: row[:position],
         role: role[:name],
         style: role[:style],
-        value: [8, (value / 11.to_d)].min].round(3),
+        value: [8, (value / 11.to_d)].min.round(3),
         grade: get_letter_grade(role[:rating].floor),
         draft_round: row[:plyr_draftround].to_i > 7 ? nil : row[:plyr_draftround].to_i,
         draft_pick: row[:plyr_draftround].to_i > 7 ? nil : row[:plyr_draftpick].to_i,

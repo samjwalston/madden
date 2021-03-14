@@ -6,11 +6,11 @@ class Calculate::Position
   end
 
   def rating
-    @rating ||= calculate_rating
+    @rating ||= (calculate_rating || 0)
   end
 
   def value
-    @value ||= calculate_value
+    @value ||= (calculate_value || 0.to_d)
   end
 
   def role
@@ -39,9 +39,9 @@ class Calculate::Position
       player_count == 1 ? players.first : players[0...player_count]
     elsif !@archetypes.empty?
       archetypes = (styles.empty? ? @archetypes : @archetypes.to_a.find_all{|a| a[:name].in?(styles)})
-      archetypes.sort{|a, b| [b[:overall_rating], (roles.index(b[:name]) || -1)] <=> [a[:overall_rating], (roles.index(a[:name]) || -1)]}.first
+      archetypes.sort{|a, b| [b[:overall_rating], (roles.index(b[:name]) || -1)] <=> [a[:overall_rating], (roles.index(a[:name]) || -1)]}.first.to_h
     else
-      nil
+      {}
     end
   end
 end
