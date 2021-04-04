@@ -53,32 +53,32 @@ class Import::Prospects < Import::Job
         archetypes << archetype
       end
 
-      role = get_role(row[:position], row[:weight].to_i, prospect_archetypes, "prospect")
-      value = get_base_value(role[:value])
+      role = get_role(row[:position], row[:weight].to_i, prospect_archetypes, "player")
+      value = role[:rating].to_d
+      value = get_contract_value(role)
       age = row[:age].to_i
 
       if age == 20
-        value = (value + 1.to_d)
+        value += 0.05.to_d
       elsif age == 21
-        value = (value + 0.5.to_d)
+        value += 0.02.to_d
       elsif age == 23
-        value = (value - 0.5.to_d)
+        value -= 0.02.to_d
       elsif age == 24
-        value = (value - 1.to_d)
+        value -= 0.05.to_d
       end
 
       if row[:traitdevelopment] == "XFactor"
         dev_trait = "XF"
-        value = (value + 7.to_d)
+        value += 0.5.to_d
       elsif row[:traitdevelopment] == "Superstar"
         dev_trait = "SS"
-        value = (value + 3.to_d)
+        value += 0.2.to_d
       elsif row[:traitdevelopment] == "Star"
         dev_trait = "S"
-        value = (value + 1.to_d)
       else
+        value -= 0.2.to_d
         dev_trait = nil
-        value = value
       end
 
       prospects << {
@@ -88,7 +88,7 @@ class Import::Prospects < Import::Job
         position: row[:position],
         role: role[:name],
         style: role[:style],
-        value: [8, (value / 11.to_d)].min.round(3),
+        value: [8, value].min.round(3),
         grade: get_letter_grade(role[:rating].floor),
         draft_round: row[:plyr_draftround].to_i > 7 ? nil : row[:plyr_draftround].to_i,
         draft_pick: row[:plyr_draftround].to_i > 7 ? nil : row[:plyr_draftpick].to_i,
@@ -99,11 +99,27 @@ class Import::Prospects < Import::Job
     [prospects, archetypes]
   end
 
-  def get_base_value(value)
-    value * (1 + ((value.floor - 70.to_d) * 0.01.to_d))
-  end
-
   def get_grade_rating(grade)
     ["F","D","D+","C-","C","C+","B-","B","B+","A-","A","A+"].index(grade)
+  end
+
+  def get_contract_value(role)
+    value = {
+      "QB":  0.02.to_d,
+      "HB":  0.048.to_d,
+      "FB":  0.17.to_d,
+      "WR":  0.04.to_d,
+      "TE":  0.049.to_d,
+      "OT":  0.042.to_d,
+      "IOL": 0.046.to_d,
+      "ED":  0.041.to_d,
+      "IDL": 0.044.to_d,
+      "LB":  0.045.to_d,
+      "CB":  0.043.to_d,
+      "S":   0.047.to_d,
+      "K":   0.22.to_d,
+    }[role[:name].to_sym]
+
+    ((role[:rating].to_d * 0.1.to_d) * (1.to_d - value))
   end
 end

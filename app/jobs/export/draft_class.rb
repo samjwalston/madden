@@ -98,9 +98,9 @@ class Export::DraftClass < ApplicationJob
         dev_traits[dev_trait] += 1
         info[96] = [dev_trait, 0].max
 
-        data << [(pick[:OVR] * VALUES[pick[:POS].to_s.split("-").first.to_sym].to_d) + ((pick[:AGE] - 22) * -1), info]
+        data << [(pick[:OVR] * VALUES[pick[:POS].to_s.split("-").first.to_sym].to_d) + ((pick[:AGE] - 22) * -0.02), info]
       else
-        data << [(row[:povr].to_i * VALUES[POSITIONS[row[:ppos].to_i].to_sym].to_d) + ((row[:page].to_i - 22) * -1), row.to_h.values]
+        data << [(row[:povr].to_i * VALUES[POSITIONS[row[:ppos].to_i].to_sym].to_d) + ((row[:page].to_i - 22) * -0.02), row.to_h.values]
       end
     end
 
@@ -230,20 +230,20 @@ class Export::DraftClass < ApplicationJob
   POSITIONS = ["QB","HB","FB","WR","TE","LT","LG","C","RG","RT","LE","RE","DT","LOLB","MLB","ROLB","CB","FS","SS","K","P"].freeze
 
   VALUES = {
-    "QB":   1,
-    "HB":   0.9612,
-    "FB":   0.8,
-    "WR":   0.975,
-    "TE":   0.9722,
-    "OT":   0.9762,
-    "IOL":  0.9655,
-    "EDGE": 0.9762,
-    "IDL":  0.9727,
-    "LB":   0.9652,
-    "CB":   0.9772,
-    "S":    0.9732,
-    "K":    0.8,
-    "P":    0.8,
+    "QB":   0.98,
+    "HB":   0.952,
+    "FB":   0.83,
+    "WR":   0.96,
+    "TE":   0.951,
+    "OT":   0.958,
+    "IOL":  0.954,
+    "EDGE": 0.959,
+    "IDL":  0.956,
+    "LB":   0.955,
+    "CB":   0.957,
+    "S":    0.953,
+    "K":    0.78,
+    "P":    0.78,
   }.freeze
 
   KEYS = {
