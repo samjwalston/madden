@@ -10,7 +10,7 @@ class Calculate::Quarterback < Calculate::Position
   end
 
   def roles
-    @roles ||= ["Scrambler", "Strong Arm", "Improviser", "Field General"]
+    @roles ||= ["Scrambler", "Strong Arm", "Field General", "Improviser"]
   end
 
   # Player(archetypes)
@@ -34,6 +34,12 @@ class Calculate::Quarterback < Calculate::Position
   end
 
   def passing_rating
-    @passing_rating ||= get_roles(1)[:overall_rating]
+    @passing_rating unless @passing_rating.nil?
+    improviser = get_roles(1, "Improviser")[:overall_rating]
+    field_general = get_roles(1, "Field General")[:overall_rating]
+    strong_arm = get_roles(1, "Strong Arm")[:overall_rating]
+    scrambler = get_roles(1, "Scrambler")[:overall_rating]
+
+    @passing_rating = [improviser.to_d * 0.4, field_general.to_d * 0.3, strong_arm.to_d * 0.2, scrambler.to_d * 0.1].sum
   end
 end

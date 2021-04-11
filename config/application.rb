@@ -37,6 +37,7 @@ module Madden
 
     console do
       Rails::ConsoleMethods.include(::FreeAgencyHelpers)
+      Rails::ConsoleMethods.include(::SeasonHelpers)
     end
   end
 end

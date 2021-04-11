@@ -36,9 +36,9 @@ class Calculate::WideReceiver < Calculate::Position
   # Team:Receiving(players)
   def calculate_rating
     if @category.in?(["player", "prospect"])
-      receiving_rating
+      total_rating
     elsif @category == "receiving"
-      receiving_rating(3)
+      total_rating(3)
     end
   end
 
@@ -47,11 +47,11 @@ class Calculate::WideReceiver < Calculate::Position
   # FreeAgency(players)
   def calculate_value
     if @category == "player"
-      (receiving_rating * PLAYER_VALUE).round(4)
+      (total_rating * PLAYER_VALUE).round(4)
     elsif @category == "prospect"
-      (receiving_rating * PROSPECT_VALUE)
+      (total_rating * PROSPECT_VALUE)
     elsif @category == "free_agency"
-      (receiving_rating(3) * (PLAYER_VALUE * 3)).round(2).to_f
+      (total_rating(3) * (PLAYER_VALUE * 3)).round(2).to_f
     end
   end
 
@@ -71,6 +71,19 @@ class Calculate::WideReceiver < Calculate::Position
     end
   end
 
+  def route_runner_rating(player_count = 1)
+    @route_runner_rating unless @route_runner_rating.nil?
+    archetypes = get_roles(player_count, "Route Runner")
+
+    if player_count == 1
+      @route_runner_rating = archetypes[:overall_rating]
+    else
+      @route_runner_rating = (archetypes.map do |archetype|
+        archetype[:overall_rating]
+      end.sum / player_count.to_d)
+    end
+  end
+
   def format_styles(styles)
     styles.map do |s|
       if s.in?(["Router Runner", "Physical", "Vertical Threat"])
@@ -81,5 +94,9 @@ class Calculate::WideReceiver < Calculate::Position
         2
       end
     end.uniq
+  end
+
+  def total_rating(player_count = 1)
+    [receiving_rating(player_count).to_d * 0.75.to_d, route_runner_rating(player_count).to_d * 0.25.to_d].sum
   end
 end
