@@ -5,3 +5,19 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+
+# Seed Teams
+# ===
+team_names = ["Bears", "Bengals", "Bills", "Broncos", "Browns", "Buccaneers", "Cardinals", "Chargers", "Chiefs", "Colts", "Cowboys", "Dolphins", "Eagles", "Falcons", "49ers", "Giants", "Jaguars", "Jets", "Lions", "Packers", "Panthers", "Patriots", "Raiders", "Rams", "Ravens", "Redskins", "Saints", "Seahawks", "Steelers", "Titans", "Vikings", "Texans"]
+
+Team.delete_all
+
+team_names.each_with_index do |name, index|
+  Team.create(id: (index + 1), name: name)
+end
+
+
+# Seed Players
+# ===
+{}

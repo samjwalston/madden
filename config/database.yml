@@ -23,7 +23,7 @@ default: &default
 
 development:
   <<: *default
-  database: Madden_development
+  database: madden_development
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -57,7 +57,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: Madden_test
+  database: madden_test
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -81,6 +81,6 @@ test:
 #
 production:
   <<: *default
-  database: Madden_production
-  username: Madden
+  database: madden_production
+  username: madden
   password: <%= ENV['MADDEN_DATABASE_PASSWORD'] %>
