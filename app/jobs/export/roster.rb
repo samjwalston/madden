@@ -8,7 +8,7 @@ class Export::Roster < ApplicationJob
 
 
   def perform(filepath)
-    CSV.foreach(Rails.root.join("vendor/roster.csv"), headers: true, header_converters: :symbol) do |row|
+    CSV.foreach(Rails.root.join(filepath), headers: true, header_converters: :symbol) do |row|
       player = nil
 
       @rosters.each do |plyr|
