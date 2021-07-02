@@ -34,5 +34,9 @@ module Madden
     # in config/environments, which are processed later.
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    console do
+      Rails::ConsoleMethods.include(::RosterHelpers)
+    end
   end
 end

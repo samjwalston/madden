@@ -1,1 +1,7 @@
 --require spec_helper
+
+<% if ENV['SPEC'].downcase == 'u' || ENV['SPEC'].downcase == 'unit' %>
+  --pattern spec/unit/**/*_spec.rb
+<% elsif ENV['SPEC'].downcase == 'i' || ENV['SPEC'].downcase == 'integration' %>
+  --pattern spec/integration/**/*_spec.rb
+<% end %>

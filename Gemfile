@@ -9,5 +9,4 @@ gem 'redis', '~> 4.3'
 group :development, :test do
   gem 'spring', '~> 2.1'
   gem 'rspec-rails', '~> 5.0'
-  gem 'faker', '~> 2.18'
 end
